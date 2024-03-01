@@ -1,0 +1,177 @@
+diff --git a/src/crypto/crypto_cipher.cc b/src/crypto/crypto_cipher.cc
+index 8cc2b1786c..418b5b8477 100644
+--- a/src/crypto/crypto_cipher.cc
++++ b/src/crypto/crypto_cipher.cc
+@@ -1051,22 +1051,23 @@ void PublicKeyCipher::Cipher(const FunctionCallbackInfo<Value>& args) {
+     if (EVP_PKEY_decrypt_init(ctx.get()) <= 0) {
+       return ThrowCryptoError(env, ERR_get_error());
+     }
+-
+-    int rsa_pkcs1_implicit_rejection =
+-        EVP_PKEY_CTX_ctrl_str(ctx.get(), "rsa_pkcs1_implicit_rejection", "1");
+-    // From the doc -2 means that the option is not supported.
+-    // The default for the option is enabled and if it has been
+-    // specifically disabled we want to respect that so we will
+-    // not throw an error if the option is supported regardless
+-    // of how it is set. The call to set the value
+-    // will not affect what is used since a different context is
+-    // used in the call if the option is supported
+-    if (rsa_pkcs1_implicit_rejection <= 0) {
+-      return THROW_ERR_INVALID_ARG_VALUE(
+-          env,
+-          "RSA_PKCS1_PADDING is no longer supported for private decryption,"
+-          " this can be reverted with --security-revert=CVE-2024-PEND");
+-    }
++    #ifndef OPENSSL_IS_AWSLC
++      int rsa_pkcs1_implicit_rejection =
++          EVP_PKEY_CTX_ctrl_str(ctx.get(), "rsa_pkcs1_implicit_rejection", "1");
++      // From the doc -2 means that the option is not supported.
++      // The default for the option is enabled and if it has been
++      // specifically disabled we want to respect that so we will
++      // not throw an error if the option is supported regardless
++      // of how it is set. The call to set the value
++      // will not affect what is used since a different context is
++      // used in the call if the option is supported
++      if (rsa_pkcs1_implicit_rejection <= 0) {
++        return THROW_ERR_INVALID_ARG_VALUE(
++            env,
++            "RSA_PKCS1_PADDING is no longer supported for private decryption,"
++            " this can be reverted with --security-revert=CVE-2024-PEND");
++      }
++    #endif // OPENSSL_IS_AWSLC
+   }
+ 
+   const EVP_MD* digest = nullptr;
+diff --git a/src/crypto/crypto_common.cc b/src/crypto/crypto_common.cc
+index c6120a655e..48d00f1aa7 100644
+--- a/src/crypto/crypto_common.cc
++++ b/src/crypto/crypto_common.cc
+@@ -159,6 +159,16 @@ const char* GetClientHelloALPN(const SSLPointer& ssl) {
+   size_t len;
+   size_t rem;
+ 
++#ifdef OPENSSL_IS_AWSLC
++  if (!SSL_early_callback_ctx_extension_get(
++          ssl.get(),
++          TLSEXT_TYPE_application_layer_protocol_negotiation,
++          &buf,
++          &rem) ||
++      rem < 2) {
++        return nullptr;
++      }
++#else
+   if (!SSL_client_hello_get0_ext(
+           ssl.get(),
+           TLSEXT_TYPE_application_layer_protocol_negotiation,
+@@ -167,7 +177,8 @@ const char* GetClientHelloALPN(const SSLPointer& ssl) {
+       rem < 2) {
+     return nullptr;
+   }
+-
++#endif // OPENSSL_IS_AWSLC
++  
+   len = (buf[0] << 8) | buf[1];
+   if (len + 2 != rem) return nullptr;
+   return reinterpret_cast<const char*>(buf + 3);
+@@ -178,6 +189,15 @@ const char* GetClientHelloServerName(const SSLPointer& ssl) {
+   size_t len;
+   size_t rem;
+ 
++#ifdef OPENSSL_IS_AWSLC
++  if (!SSL_early_callback_ctx_extension_get(
++          ssl.get(),
++          TLSEXT_TYPE_application_layer_protocol_negotiation,
++          &buf,
++          &rem) || rem <= 2) {
++        return nullptr;
++      }
++#else
+   if (!SSL_client_hello_get0_ext(
+           ssl.get(),
+           TLSEXT_TYPE_server_name,
+@@ -185,6 +205,7 @@ const char* GetClientHelloServerName(const SSLPointer& ssl) {
+           &rem) || rem <= 2) {
+     return nullptr;
+   }
++#endif // OPENSSL_IS_AWSLC
+ 
+   len = (*buf << 8) | *(buf + 1);
+   if (len + 2 != rem)
+diff --git a/src/crypto/crypto_context.cc b/src/crypto/crypto_context.cc
+index 6e5bbe07d0..38f948b54a 100644
+--- a/src/crypto/crypto_context.cc
++++ b/src/crypto/crypto_context.cc
+@@ -858,13 +858,15 @@ void SecureContext::SetDHParam(const FunctionCallbackInfo<Value>& args) {
+ 
+   CHECK_GE(args.Length(), 1);  // DH argument is mandatory
+ 
+-  // If the user specified "auto" for dhparams, the JavaScript layer will pass
+-  // true to this function instead of the original string. Any other string
+-  // value will be interpreted as custom DH parameters below.
+-  if (args[0]->IsTrue()) {
+-    CHECK(SSL_CTX_set_dh_auto(sc->ctx_.get(), true));
+-    return;
+-  }
++  #ifndef OPENSSL_IS_AWSLC
++    // If the user specified "auto" for dhparams, the JavaScript layer will pass
++    // true to this function instead of the original string. Any other string
++    // value will be interpreted as custom DH parameters below.
++    if (args[0]->IsTrue()) {
++      CHECK(SSL_CTX_set_dh_auto(sc->ctx_.get(), true));
++      return;
++    }
++  #endif // OPENSSL_IS_AWSLC
+ 
+   DHPointer dh;
+   {
+diff --git a/src/crypto/crypto_dh.cc b/src/crypto/crypto_dh.cc
+index b4447102a8..ad03527d7a 100644
+--- a/src/crypto/crypto_dh.cc
++++ b/src/crypto/crypto_dh.cc
+@@ -217,17 +217,19 @@ typedef BignumPointer (*StandardizedGroupInstantiator)();
+ // Returns a function that can be used to create an instance of a standardized
+ // Diffie-Hellman group. The generator is always kStandardizedGenerator.
+ inline StandardizedGroupInstantiator FindDiffieHellmanGroup(const char* name) {
+-#define V(n, p)                                                                \
+-  if (StringEqualNoCase(name, n)) return InstantiateStandardizedGroup<p>
+-  V("modp1", BN_get_rfc2409_prime_768);
+-  V("modp2", BN_get_rfc2409_prime_1024);
+-  V("modp5", BN_get_rfc3526_prime_1536);
+-  V("modp14", BN_get_rfc3526_prime_2048);
+-  V("modp15", BN_get_rfc3526_prime_3072);
+-  V("modp16", BN_get_rfc3526_prime_4096);
+-  V("modp17", BN_get_rfc3526_prime_6144);
+-  V("modp18", BN_get_rfc3526_prime_8192);
+-#undef V
++  #ifndef OPENSSL_IS_AWSLC
++    #define V(n, p)                                                                \
++      if (StringEqualNoCase(name, n)) return InstantiateStandardizedGroup<p>
++      V("modp1", BN_get_rfc2409_prime_768);
++      V("modp2", BN_get_rfc2409_prime_1024);
++      V("modp5", BN_get_rfc3526_prime_1536);
++      V("modp14", BN_get_rfc3526_prime_2048);
++      V("modp15", BN_get_rfc3526_prime_3072);
++      V("modp16", BN_get_rfc3526_prime_4096);
++      V("modp17", BN_get_rfc3526_prime_6144);
++      V("modp18", BN_get_rfc3526_prime_8192);
++    #undef V
++  #endif // OPENSSL_IS_AWSLC
+   return nullptr;
+ }
+ 
+@@ -544,6 +546,7 @@ Maybe<bool> DhKeyGenTraits::AdditionalConfig(
+   return Just(true);
+ }
+ 
++#ifndef OPENSSL_IS_AWSLC
+ EVPKeyCtxPointer DhKeyGenTraits::Setup(DhKeyPairGenConfig* params) {
+   EVPKeyPointer key_params;
+   if (BignumPointer* prime_fixed_value =
+@@ -591,6 +594,7 @@ EVPKeyCtxPointer DhKeyGenTraits::Setup(DhKeyPairGenConfig* params) {
+ 
+   return ctx;
+ }
++#endif //OPENSSL_IS_AWSLC
+ 
+ Maybe<bool> DHKeyExportTraits::AdditionalConfig(
+     const FunctionCallbackInfo<Value>& args,
