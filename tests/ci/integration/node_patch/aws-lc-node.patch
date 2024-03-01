@@ -175,3 +175,25 @@ index b4447102a8..ad03527d7a 100644
  
  Maybe<bool> DHKeyExportTraits::AdditionalConfig(
      const FunctionCallbackInfo<Value>& args,
+diff --git a/src/crypto/crypto_util.cc b/src/crypto/crypto_util.cc
+index 5734d8fdc5..f6a959c261 100644
+--- a/src/crypto/crypto_util.cc
++++ b/src/crypto/crypto_util.cc
+@@ -155,7 +155,7 @@ static Mutex fips_mutex;
+ void InitCryptoOnce() {
+   Mutex::ScopedLock lock(per_process::cli_options_mutex);
+   Mutex::ScopedLock fips_lock(fips_mutex);
+-#ifndef OPENSSL_IS_BORINGSSL
++#if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
+   OPENSSL_INIT_SETTINGS* settings = OPENSSL_INIT_new();
+ 
+ #if OPENSSL_VERSION_MAJOR < 3
+@@ -199,7 +199,7 @@ void InitCryptoOnce() {
+   }
+ #endif
+ 
+-#endif  // OPENSSL_IS_BORINGSSL
++#endif  // OPENSSL_IS_BORINGSSL && OPENSSL_IS_AWSLC
+ 
+   // Turn off compression. Saves memory and protects against CRIME attacks.
+   // No-op with OPENSSL_NO_COMP builds of OpenSSL.
