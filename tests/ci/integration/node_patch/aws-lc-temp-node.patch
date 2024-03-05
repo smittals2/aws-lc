@@ -1,0 +1,137 @@
+diff --git a/src/crypto/crypto_common.cc b/src/crypto/crypto_common.cc
+index c6120a655e..2d926ed6d1 100644
+--- a/src/crypto/crypto_common.cc
++++ b/src/crypto/crypto_common.cc
+@@ -154,6 +154,8 @@ bool UseSNIContext(
+   return err == 1;
+ }
+ 
++// Stub
++#ifndef OPENSSL_IS_AWSLC
+ const char* GetClientHelloALPN(const SSLPointer& ssl) {
+   const unsigned char* buf;
+   size_t len;
+@@ -166,8 +168,8 @@ const char* GetClientHelloALPN(const SSLPointer& ssl) {
+           &rem) ||
+       rem < 2) {
+     return nullptr;
+-  }
+-
++    }
++  
+   len = (buf[0] << 8) | buf[1];
+   if (len + 2 != rem) return nullptr;
+   return reinterpret_cast<const char*>(buf + 3);
+@@ -200,6 +202,8 @@ const char* GetClientHelloServerName(const SSLPointer& ssl) {
+     return nullptr;
+   return reinterpret_cast<const char*>(buf + 5);
+ }
++#endif // OPENSSL_IS_AWSLC
++
+ 
+ const char* GetServerName(SSL* ssl) {
+   return SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
+@@ -1040,6 +1044,8 @@ MaybeLocal<Value> GetCurrentCipherValue(Environment* env,
+   return Get(env, SSL_get_current_cipher(ssl.get()));
+ }
+ 
++// Stub
++#ifndef OPENSSL_IS_AWSLC
+ MaybeLocal<Array> GetClientHelloCiphers(
+     Environment* env,
+     const SSLPointer& ssl) {
+@@ -1072,6 +1078,7 @@ MaybeLocal<Array> GetClientHelloCiphers(
+   Local<Array> ret = Array::New(env->isolate(), ciphers.out(), count);
+   return scope.Escape(ret);
+ }
++#endif //OPENSSL_IS_AWSLC
+ 
+ 
+ MaybeLocal<Object> GetCipherInfo(Environment* env, const SSLPointer& ssl) {
+diff --git a/src/crypto/crypto_context.cc b/src/crypto/crypto_context.cc
+index 6e5bbe07d0..8020a92cc0 100644
+--- a/src/crypto/crypto_context.cc
++++ b/src/crypto/crypto_context.cc
+@@ -865,7 +865,6 @@ void SecureContext::SetDHParam(const FunctionCallbackInfo<Value>& args) {
+     CHECK(SSL_CTX_set_dh_auto(sc->ctx_.get(), true));
+     return;
+   }
+-
+   DHPointer dh;
+   {
+     BIOPointer bio(LoadBIO(env, args[0]));
+diff --git a/src/crypto/crypto_dh.cc b/src/crypto/crypto_dh.cc
+index b4447102a8..08d7bef995 100644
+--- a/src/crypto/crypto_dh.cc
++++ b/src/crypto/crypto_dh.cc
+@@ -217,17 +217,20 @@ typedef BignumPointer (*StandardizedGroupInstantiator)();
+ // Returns a function that can be used to create an instance of a standardized
+ // Diffie-Hellman group. The generator is always kStandardizedGenerator.
+ inline StandardizedGroupInstantiator FindDiffieHellmanGroup(const char* name) {
+-#define V(n, p)                                                                \
+-  if (StringEqualNoCase(name, n)) return InstantiateStandardizedGroup<p>
+-  V("modp1", BN_get_rfc2409_prime_768);
+-  V("modp2", BN_get_rfc2409_prime_1024);
+-  V("modp5", BN_get_rfc3526_prime_1536);
+-  V("modp14", BN_get_rfc3526_prime_2048);
+-  V("modp15", BN_get_rfc3526_prime_3072);
+-  V("modp16", BN_get_rfc3526_prime_4096);
+-  V("modp17", BN_get_rfc3526_prime_6144);
+-  V("modp18", BN_get_rfc3526_prime_8192);
+-#undef V
++  // Stub
++  #ifndef OPENSSL_IS_AWSLC
++    #define V(n, p)                                                                \
++      if (StringEqualNoCase(name, n)) return InstantiateStandardizedGroup<p>
++      V("modp1", BN_get_rfc2409_prime_768);
++      V("modp2", BN_get_rfc2409_prime_1024);
++      V("modp5", BN_get_rfc3526_prime_1536);
++      V("modp14", BN_get_rfc3526_prime_2048);
++      V("modp15", BN_get_rfc3526_prime_3072);
++      V("modp16", BN_get_rfc3526_prime_4096);
++      V("modp17", BN_get_rfc3526_prime_6144);
++      V("modp18", BN_get_rfc3526_prime_8192);
++    #undef V
++  #endif // OPENSSL_IS_AWSLC
+   return nullptr;
+ }
+ 
+@@ -544,6 +547,8 @@ Maybe<bool> DhKeyGenTraits::AdditionalConfig(
+   return Just(true);
+ }
+ 
++// Stub
++#ifndef OPENSSL_IS_AWSLC
+ EVPKeyCtxPointer DhKeyGenTraits::Setup(DhKeyPairGenConfig* params) {
+   EVPKeyPointer key_params;
+   if (BignumPointer* prime_fixed_value =
+@@ -591,6 +596,7 @@ EVPKeyCtxPointer DhKeyGenTraits::Setup(DhKeyPairGenConfig* params) {
+ 
+   return ctx;
+ }
++#endif //OPENSSL_IS_AWSLC
+ 
+ Maybe<bool> DHKeyExportTraits::AdditionalConfig(
+     const FunctionCallbackInfo<Value>& args,
+diff --git a/src/crypto/crypto_keys.cc b/src/crypto/crypto_keys.cc
+index c5dd2fb8fc..ea60540c15 100644
+--- a/src/crypto/crypto_keys.cc
++++ b/src/crypto/crypto_keys.cc
+@@ -1240,6 +1240,8 @@ void KeyObjectHandle::GetAsymmetricKeyType(
+   args.GetReturnValue().Set(key->GetAsymmetricKeyType());
+ }
+ 
++//Stub
++#ifndef OPENSSL_IS_AWSLC
+ bool KeyObjectHandle::CheckEcKeyData() const {
+   MarkPopErrorOnReturn mark_pop_error_on_return;
+ 
+@@ -1260,6 +1262,8 @@ bool KeyObjectHandle::CheckEcKeyData() const {
+   return EVP_PKEY_public_check(ctx.get()) == 1;
+ #endif
+ }
++#endif //OPENSSL_IS_AWSLC
++
+ 
+ void KeyObjectHandle::CheckEcKeyData(const FunctionCallbackInfo<Value>& args) {
+   KeyObjectHandle* key;
