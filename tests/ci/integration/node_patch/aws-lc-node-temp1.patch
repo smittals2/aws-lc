@@ -1,0 +1,71 @@
+diff --git a/src/crypto/crypto_dh.cc b/src/crypto/crypto_dh.cc
+index b4447102a8..20d7cf1723 100644
+--- a/src/crypto/crypto_dh.cc
++++ b/src/crypto/crypto_dh.cc
+@@ -217,17 +217,20 @@ typedef BignumPointer (*StandardizedGroupInstantiator)();
+ // Returns a function that can be used to create an instance of a standardized
+ // Diffie-Hellman group. The generator is always kStandardizedGenerator.
+ inline StandardizedGroupInstantiator FindDiffieHellmanGroup(const char* name) {
+-#define V(n, p)                                                                \
+-  if (StringEqualNoCase(name, n)) return InstantiateStandardizedGroup<p>
+-  V("modp1", BN_get_rfc2409_prime_768);
+-  V("modp2", BN_get_rfc2409_prime_1024);
+-  V("modp5", BN_get_rfc3526_prime_1536);
+-  V("modp14", BN_get_rfc3526_prime_2048);
+-  V("modp15", BN_get_rfc3526_prime_3072);
+-  V("modp16", BN_get_rfc3526_prime_4096);
+-  V("modp17", BN_get_rfc3526_prime_6144);
+-  V("modp18", BN_get_rfc3526_prime_8192);
+-#undef V
++  #define V(n, p)                                                                \
++    if (StringEqualNoCase(name, n)) return InstantiateStandardizedGroup<p>
++    // Stub
++    #ifndef OPENSSL_IS_AWSLC
++    V("modp1", BN_get_rfc2409_prime_768);
++    V("modp2", BN_get_rfc2409_prime_1024);
++    #endif // OPENSSL_IS_AWSLC
++    V("modp5", BN_get_rfc3526_prime_1536);
++    V("modp14", BN_get_rfc3526_prime_2048);
++    V("modp15", BN_get_rfc3526_prime_3072);
++    V("modp16", BN_get_rfc3526_prime_4096);
++    V("modp17", BN_get_rfc3526_prime_6144);
++    V("modp18", BN_get_rfc3526_prime_8192);
++  #undef V
+   return nullptr;
+ }
+ 
+@@ -552,6 +555,8 @@ EVPKeyCtxPointer DhKeyGenTraits::Setup(DhKeyPairGenConfig* params) {
+     if (!dh)
+       return EVPKeyCtxPointer();
+ 
++    // Stub
++#ifndef OPENSSL_IS_AWSLC
+     BIGNUM* prime = prime_fixed_value->get();
+     BignumPointer bn_g(BN_new());
+     if (!BN_set_word(bn_g.get(), params->params.generator) ||
+@@ -565,9 +570,15 @@ EVPKeyCtxPointer DhKeyGenTraits::Setup(DhKeyPairGenConfig* params) {
+     key_params = EVPKeyPointer(EVP_PKEY_new());
+     CHECK(key_params);
+     CHECK_EQ(EVP_PKEY_assign_DH(key_params.get(), dh.release()), 1);
++#else
++    return EVPKeyCtxPointer();
++#endif
+   } else if (int* prime_size = std::get_if<int>(&params->params.prime)) {
+     EVPKeyCtxPointer param_ctx(EVP_PKEY_CTX_new_id(EVP_PKEY_DH, nullptr));
+     EVP_PKEY* raw_params = nullptr;
++
++// Stub
++#ifndef OPENSSL_IS_AWSLC    
+     if (!param_ctx ||
+         EVP_PKEY_paramgen_init(param_ctx.get()) <= 0 ||
+         EVP_PKEY_CTX_set_dh_paramgen_prime_len(
+@@ -581,6 +592,9 @@ EVPKeyCtxPointer DhKeyGenTraits::Setup(DhKeyPairGenConfig* params) {
+     }
+ 
+     key_params = EVPKeyPointer(raw_params);
++#else 
++    return EVPKeyCtxPointer();
++#endif
+   } else {
+     UNREACHABLE();
+   }

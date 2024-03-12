@@ -1,0 +1,57 @@
+diff --git a/src/crypto/crypto_common.cc b/src/crypto/crypto_common.cc
+index c6120a655e..842f99e9f3 100644
+--- a/src/crypto/crypto_common.cc
++++ b/src/crypto/crypto_common.cc
+@@ -159,6 +159,8 @@ const char* GetClientHelloALPN(const SSLPointer& ssl) {
+   size_t len;
+   size_t rem;
+ 
++// Stub
++  #ifndef OPENSSL_IS_AWSLC
+   if (!SSL_client_hello_get0_ext(
+           ssl.get(),
+           TLSEXT_TYPE_application_layer_protocol_negotiation,
+@@ -166,11 +168,14 @@ const char* GetClientHelloALPN(const SSLPointer& ssl) {
+           &rem) ||
+       rem < 2) {
+     return nullptr;
+-  }
+-
++    }
++  
+   len = (buf[0] << 8) | buf[1];
+   if (len + 2 != rem) return nullptr;
+   return reinterpret_cast<const char*>(buf + 3);
++
++  #endif 
++  return nullptr;
+ }
+ 
+ const char* GetClientHelloServerName(const SSLPointer& ssl) {
+@@ -178,6 +183,8 @@ const char* GetClientHelloServerName(const SSLPointer& ssl) {
+   size_t len;
+   size_t rem;
+ 
++  #ifndef OPENSSL_IS_AWSLC
++
+   if (!SSL_client_hello_get0_ext(
+           ssl.get(),
+           TLSEXT_TYPE_server_name,
+@@ -199,6 +206,9 @@ const char* GetClientHelloServerName(const SSLPointer& ssl) {
+   if (len + 2 > rem)
+     return nullptr;
+   return reinterpret_cast<const char*>(buf + 5);
++
++  #endif // OPENSSL_IS_AWSLC
++  return nullptr;
+ }
+ 
+ const char* GetServerName(SSL* ssl) {
+@@ -1073,7 +1083,6 @@ MaybeLocal<Array> GetClientHelloCiphers(
+   return scope.Escape(ret);
+ }
+ 
+-
+ MaybeLocal<Object> GetCipherInfo(Environment* env, const SSLPointer& ssl) {
+   if (SSL_get_current_cipher(ssl.get()) == nullptr)
+     return MaybeLocal<Object>();
