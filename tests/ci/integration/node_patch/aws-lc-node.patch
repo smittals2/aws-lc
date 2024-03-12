@@ -1,0 +1,66 @@
+diff --git a/src/crypto/crypto_cipher.cc b/src/crypto/crypto_cipher.cc
+index 8cc2b1786c..418b5b8477 100644
+--- a/src/crypto/crypto_cipher.cc
++++ b/src/crypto/crypto_cipher.cc
+@@ -1051,22 +1051,23 @@ void PublicKeyCipher::Cipher(const FunctionCallbackInfo<Value>& args) {
+     if (EVP_PKEY_decrypt_init(ctx.get()) <= 0) {
+       return ThrowCryptoError(env, ERR_get_error());
+     }
+-
+-    int rsa_pkcs1_implicit_rejection =
+-        EVP_PKEY_CTX_ctrl_str(ctx.get(), "rsa_pkcs1_implicit_rejection", "1");
+-    // From the doc -2 means that the option is not supported.
+-    // The default for the option is enabled and if it has been
+-    // specifically disabled we want to respect that so we will
+-    // not throw an error if the option is supported regardless
+-    // of how it is set. The call to set the value
+-    // will not affect what is used since a different context is
+-    // used in the call if the option is supported
+-    if (rsa_pkcs1_implicit_rejection <= 0) {
+-      return THROW_ERR_INVALID_ARG_VALUE(
+-          env,
+-          "RSA_PKCS1_PADDING is no longer supported for private decryption,"
+-          " this can be reverted with --security-revert=CVE-2024-PEND");
+-    }
++    #ifndef OPENSSL_IS_AWSLC
++      int rsa_pkcs1_implicit_rejection =
++          EVP_PKEY_CTX_ctrl_str(ctx.get(), "rsa_pkcs1_implicit_rejection", "1");
++      // From the doc -2 means that the option is not supported.
++      // The default for the option is enabled and if it has been
++      // specifically disabled we want to respect that so we will
++      // not throw an error if the option is supported regardless
++      // of how it is set. The call to set the value
++      // will not affect what is used since a different context is
++      // used in the call if the option is supported
++      if (rsa_pkcs1_implicit_rejection <= 0) {
++        return THROW_ERR_INVALID_ARG_VALUE(
++            env,
++            "RSA_PKCS1_PADDING is no longer supported for private decryption,"
++            " this can be reverted with --security-revert=CVE-2024-PEND");
++      }
++    #endif // OPENSSL_IS_AWSLC
+   }
+
+   const EVP_MD* digest = nullptr;
+diff --git a/src/crypto/crypto_util.cc b/src/crypto/crypto_util.cc
+index 5734d8fdc5..f6a959c261 100644
+--- a/src/crypto/crypto_util.cc
++++ b/src/crypto/crypto_util.cc
+@@ -155,7 +155,7 @@ static Mutex fips_mutex;
+ void InitCryptoOnce() {
+   Mutex::ScopedLock lock(per_process::cli_options_mutex);
+   Mutex::ScopedLock fips_lock(fips_mutex);
+-#ifndef OPENSSL_IS_BORINGSSL
++#if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
+   OPENSSL_INIT_SETTINGS* settings = OPENSSL_INIT_new();
+
+ #if OPENSSL_VERSION_MAJOR < 3
+@@ -199,7 +199,7 @@ void InitCryptoOnce() {
+   }
+ #endif
+
+-#endif  // OPENSSL_IS_BORINGSSL
++#endif  // OPENSSL_IS_BORINGSSL && OPENSSL_IS_AWSLC
+
+   // Turn off compression. Saves memory and protects against CRIME attacks.
+   // No-op with OPENSSL_NO_COMP builds of OpenSSL.
