@@ -24,8 +24,18 @@ rm -rf "${SCRATCH_FOLDER:?}"/*
 cd ${SCRATCH_FOLDER}
 
 function node_build() {
+  local awslc_lib="${AWS_LC_INSTALL_FOLDER}/lib"
+
+  if [[ ! -d "$awslc_lib" ]]; then
+      awslc_lib="${AWS_LC_INSTALL_FOLDER}/lib64"
+  fi
+  if [[ ! -d "$awslc_lib" ]]; then
+      echo "Error: OpenSSL library directory not found."
+      return 1
+  fi
+
   ./configure --shared-openssl \
-    --shared-openssl-libpath="${AWS_LC_INSTALL_FOLDER}/lib" \
+    --shared-openssl-libpath="$awslc_lib" \
     --shared-openssl-includes="${AWS_LC_INSTALL_FOLDER}/include" \
     --shared-openssl-libname=crypto,ssl
   make -j "$NUM_CPU_THREADS"
