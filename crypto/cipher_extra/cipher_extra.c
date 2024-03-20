@@ -96,7 +96,7 @@ static const struct {
     {NID_rc2_cbc, "rc2-cbc", EVP_rc2_cbc},
     {NID_rc4, "rc4", EVP_rc4},
     {NID_aes_128_ccm, "aes-128-ccm", EVP_aes_128_ccm},
-    {NID_bf_ecb, "bf-ecb", EVP_bf_ecb}
+    {NID_bf_ecb, "bf-ecb", EVP_bf_ecb},
 };
 
 static const struct {
