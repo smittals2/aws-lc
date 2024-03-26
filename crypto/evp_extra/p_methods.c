@@ -16,6 +16,7 @@ static const EVP_PKEY_METHOD *const non_fips_pkey_evp_methods[] = {
   &kem_pkey_meth,
 };
 
+// We intentionally omit |dh_asn1_meth| from this list. It is not serializable.
 static const EVP_PKEY_ASN1_METHOD *const asn1_evp_pkey_methods[] = {
   &rsa_asn1_meth,
   &rsa_pss_asn1_meth,

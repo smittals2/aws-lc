@@ -381,6 +381,8 @@ add_library(
   evp_extra/print.c
   evp_extra/scrypt.c
   evp_extra/sign.c
+  evp_extra/p_dh.c
+  evp_extra/p_dh_asn1.c
   ex_data.c
   hpke/hpke.c
   hrss/hrss.c

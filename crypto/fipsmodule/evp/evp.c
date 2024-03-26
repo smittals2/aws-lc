@@ -404,11 +404,8 @@ EC_KEY *EVP_PKEY_get1_EC_KEY(const EVP_PKEY *pkey) {
   return ec_key;
 }
 
-DH *EVP_PKEY_get0_DH(const EVP_PKEY *pkey) { return NULL; }
-DH *EVP_PKEY_get1_DH(const EVP_PKEY *pkey) { return NULL; }
-
 int EVP_PKEY_assign(EVP_PKEY *pkey, int type, void *key) {
-  // This function can only be used to assign RSA, DSA, and EC keys. Other key
+  // This function can only be used to assign RSA, DSA, EC and DH keys. Other key
   // types have internal representations which are not exposed through the
   // public API.
   switch (type) {
@@ -418,6 +415,8 @@ int EVP_PKEY_assign(EVP_PKEY *pkey, int type, void *key) {
       return EVP_PKEY_assign_DSA(pkey, key);
     case EVP_PKEY_EC:
       return EVP_PKEY_assign_EC_KEY(pkey, key);
+    case EVP_PKEY_DH:
+      return EVP_PKEY_assign_DH(pkey, key);
     default:
       if (!EVP_PKEY_set_type(pkey, type)) {
         return 0;

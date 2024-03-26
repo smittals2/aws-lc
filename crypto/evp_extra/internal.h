@@ -40,6 +40,7 @@ extern const EVP_PKEY_ASN1_METHOD rsa_asn1_meth;
 extern const EVP_PKEY_ASN1_METHOD rsa_pss_asn1_meth;
 extern const EVP_PKEY_ASN1_METHOD ed25519_asn1_meth;
 extern const EVP_PKEY_ASN1_METHOD x25519_asn1_meth;
+extern const EVP_PKEY_ASN1_METHOD dh_asn1_meth;
 #ifdef ENABLE_DILITHIUM
 extern const EVP_PKEY_ASN1_METHOD dilithium3_asn1_meth;
 #endif
@@ -52,6 +53,7 @@ extern const EVP_PKEY_METHOD hkdf_pkey_meth;
 extern const EVP_PKEY_METHOD dilithium3_pkey_meth;
 extern const EVP_PKEY_METHOD kem_pkey_meth;
 extern const EVP_PKEY_METHOD hmac_pkey_meth;
+extern const EVP_PKEY_METHOD dh_pkey_meth;
 
 // Returns a reference to the list |non_fips_pkey_evp_methods|. The list has
 // size |NON_FIPS_EVP_PKEY_METHODS|.
