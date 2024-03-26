@@ -172,3 +172,13 @@ int EVP_PKEY_CTX_set_dh_pad(EVP_PKEY_CTX *ctx, int pad) {
   return EVP_PKEY_CTX_ctrl(ctx, EVP_PKEY_DH, EVP_PKEY_OP_DERIVE,
                            EVP_PKEY_CTRL_DH_PAD, pad, NULL);
 }
+
+int EVP_PKEY_CTX_set_dh_paramgen_prime_len(EVP_PKEY_CTX *ctx, int len) {
+  return EVP_PKEY_CTX_ctrl(ctx, EVP_PKEY_DH, EVP_PKEY_OP_PARAMGEN,
+                        EVP_PKEY_CTRL_DH_PARAMGEN_PRIME_LEN, len, NULL);
+}
+
+int EVP_PKEY_CTX_set_dh_paramgen_generator(EVP_PKEY_CTX *ctx, int gen) {
+  return EVP_PKEY_CTX_ctrl(ctx, EVP_PKEY_DH, EVP_PKEY_OP_PARAMGEN,
+                        EVP_PKEY_CTRL_DH_PARAMGEN_GENERATOR, gen, NULL);
+}
