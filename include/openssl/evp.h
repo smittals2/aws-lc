@@ -959,6 +959,11 @@ OPENSSL_EXPORT int EVP_PKEY_kem_check_key(EVP_PKEY *key);
 // for multiple operations.
 OPENSSL_EXPORT int EVP_PKEY_CTX_set_dh_pad(EVP_PKEY_CTX *ctx, int pad);
 
+int EVP_PKEY_CTX_set_dh_paramgen_prime_len(EVP_PKEY_CTX *ctx, int len);
+int EVP_PKEY_CTX_set_dh_paramgen_generator(EVP_PKEY_CTX *ctx, int gen);
+
+
+
 // Deprecated functions.
 
 // EVP_PKEY_RSA2 was historically an alternate form for RSA public keys (OID
