@@ -32,13 +32,15 @@ cd ${SCRATCH_FOLDER}
 
 function openvpn_build() {
   autoreconf -ivf
-  OPENSSL_CFLAGS="-I/${AWS_LC_INSTALL_FOLDER}/include" && OPENSSL_LIBS="-L/${AWS_LC_INSTALL_FOLDER}/lib64 -lssl -lcrypto" && \
+
+  OPENSSL_CFLAGS="-I/${AWS_LC_INSTALL_FOLDER}/include" \
+  OPENSSL_LIBS="-L/${AWS_LC_INSTALL_FOLDER}/lib64 -lssl -lcrypto" \
   ./configure \
-  --prefix $OPENVPN_BUILD_PREFIX \
-  --exec-prefix $OPENVPN_BUILD_EPREFIX \
-  --with-crypto-library=openssl \
-  --with-openssl-engine=no \
-  --disable-management
+    --prefix="$OPENVPN_BUILD_PREFIX" \
+    --exec-prefix="$OPENVPN_BUILD_EPREFIX" \
+    --with-crypto-library=openssl \
+    --with-openssl-engine=no \
+    --disable-management
 
   make
   make install
@@ -57,7 +59,7 @@ cd ${OPENVPN_SRC_FOLDER} && git checkout b25c6d7
 mkdir -p ${AWS_LC_BUILD_FOLDER} ${AWS_LC_INSTALL_FOLDER}
 ls
 
-aws_lc_build "$SRC_ROOT" "$AWS_LC_BUILD_FOLDER" "$AWS_LC_INSTALL_FOLDER" -DBUILD_TESTING=OFF -DBUILD_TOOL=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=0
+aws_lc_build "$SRC_ROOT" "$AWS_LC_BUILD_FOLDER" "$AWS_LC_INSTALL_FOLDER" -DBUILD_TESTING=OFF -DBUILD_TOOL=OFF -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=0
 
 # Build nginx from source.
 pushd ${OPENVPN_SRC_FOLDER}
