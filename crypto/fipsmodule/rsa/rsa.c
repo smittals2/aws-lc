@@ -409,6 +409,54 @@ int RSA_set0_crt_params(RSA *rsa, BIGNUM *dmp1, BIGNUM *dmq1, BIGNUM *iqmp) {
   return 1;
 }
 
+int RSA_meth_set_init(RSA_METHOD *meth, int (*init) (RSA *rsa)) {
+  meth->init = init;
+  return 1;
+}
+
+int RSA_meth_set_finish(RSA_METHOD *meth, int (*finish) (RSA *rsa)) {
+  meth->finish = finish;
+  return 1;
+}
+
+int RSA_meth_set_priv_dec(RSA_METHOD *meth,
+                          int (*priv_dec) (int flen, const unsigned char *from,
+                                           unsigned char *to, RSA *rsa,
+                                           int padding)) {
+  meth->rsa_priv_dec = priv_dec;
+  return 1;
+}
+
+int RSA_meth_set_priv_enc(RSA_METHOD *meth,
+                          int (*priv_enc) (int flen, const unsigned char *from,
+                                           unsigned char *to, RSA *rsa,
+                                           int padding)) {
+  meth->rsa_priv_enc = priv_enc;
+  return 1;
+}
+
+int RSA_meth_set_pub_dec(RSA_METHOD *meth,
+                         int (*pub_dec) (int flen, const unsigned char *from,
+                                         unsigned char *to, RSA *rsa,
+                                         int padding)) {
+  meth->rsa_pub_dec = pub_dec;
+  return 1;
+}
+
+int RSA_meth_set_pub_enc(RSA_METHOD *meth,
+                         int (*pub_enc) (int flen, const unsigned char *from,
+                                         unsigned char *to, RSA *rsa,
+                                         int padding)) {
+  meth->rsa_pub_enc = pub_enc;
+  return 1;
+}
+
+int RSA_meth_set0_app_data(RSA_METHOD *meth, void *app_data)
+{
+  meth->app_data = app_data;
+  return 1;
+}
+
 static int rsa_sign_raw_no_self_test(RSA *rsa, size_t *out_len, uint8_t *out,
                                      size_t max_out, const uint8_t *in,
                                      size_t in_len, int padding) {

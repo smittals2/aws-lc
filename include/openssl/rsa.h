@@ -215,6 +215,33 @@ OPENSSL_EXPORT int RSA_set0_factors(RSA *rsa, BIGNUM *p, BIGNUM *q);
 OPENSSL_EXPORT int RSA_set0_crt_params(RSA *rsa, BIGNUM *dmp1, BIGNUM *dmq1,
                                        BIGNUM *iqmp);
 
+int RSA_meth_set_init(RSA_METHOD *meth, int (*init) (RSA *rsa));
+
+int RSA_meth_set_finish(RSA_METHOD *meth, int (*finish) (RSA *rsa));
+
+int RSA_meth_set_priv_dec(RSA_METHOD *meth,
+                          int (*priv_dec) (int flen, const unsigned char *from,
+                                           unsigned char *to, RSA *rsa,
+                                           int padding));
+
+int RSA_meth_set_priv_enc(RSA_METHOD *meth,
+                          int (*priv_enc) (int flen, const unsigned char *from,
+                                           unsigned char *to, RSA *rsa,
+                                           int padding));
+
+int RSA_meth_set_pub_dec(RSA_METHOD *meth,
+                         int (*pub_dec) (int flen, const unsigned char *from,
+                                         unsigned char *to, RSA *rsa,
+                                         int padding));
+
+int RSA_meth_set_pub_enc(RSA_METHOD *meth,
+                         int (*pub_enc) (int flen, const unsigned char *from,
+                                         unsigned char *to, RSA *rsa,
+                                         int padding));
+
+int RSA_meth_set0_app_data(RSA_METHOD *meth, void *app_data);
+
+
 
 // Key generation.
 
@@ -863,6 +890,15 @@ struct rsa_meth_st {
   // functionality demanded by those, higher level, operations.
   int (*private_transform)(RSA *rsa, uint8_t *out, const uint8_t *in,
                            size_t len);
+
+  int (*rsa_pub_enc) (int flen, const unsigned char *from,
+                      unsigned char *to, RSA *rsa, int padding);
+  int (*rsa_pub_dec) (int flen, const unsigned char *from,
+                      unsigned char *to, RSA *rsa, int padding);
+  int (*rsa_priv_enc) (int flen, const unsigned char *from,
+                       unsigned char *to, RSA *rsa, int padding);
+  int (*rsa_priv_dec) (int flen, const unsigned char *from,
+                       unsigned char *to, RSA *rsa, int padding);
 
   int flags;
 };
