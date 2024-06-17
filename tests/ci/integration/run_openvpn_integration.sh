@@ -40,6 +40,7 @@ function openvpn_build() {
     --exec-prefix="$OPENVPN_BUILD_EPREFIX" \
     --with-crypto-library=openssl \
     --with-openssl-engine=no \
+    --enable-werror \
     --disable-management
 
   make
