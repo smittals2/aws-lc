@@ -490,12 +490,21 @@ void ECDSA_METHOD_free(ECDSA_METHOD *ecdsa_meth) {
   }
 }
 
-int ECDSA_set_method(EC_KEY *eckey, ECDSA_METHOD *meth) {
-  if(eckey == NULL || meth == NULL) {
+int ECDSA_set_method(EC_KEY *ec, ECDSA_METHOD *meth) {
+  if(ec == NULL || meth == NULL) {
     OPENSSL_PUT_ERROR(ECDSA, ERR_R_PASSED_NULL_PARAMETER);
     return 0;
   }
 
-  eckey->ecdsa_meth = meth;
+  ec->ecdsa_meth = meth;
   return 1;
+}
+
+ECDSA_METHOD *ECDSA_get_method(EC_KEY *ec) {
+  if(ec == NULL) {
+    OPENSSL_PUT_ERROR(ECDSA, ERR_R_PASSED_NULL_PARAMETER);
+    return NULL;
+  }
+
+  return ec->ecdsa_meth;
 }
