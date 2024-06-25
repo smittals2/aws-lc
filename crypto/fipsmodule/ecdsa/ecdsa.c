@@ -483,3 +483,9 @@ ECDSA_METHOD *ECDSA_METHOD_new(const ECDSA_METHOD *ecdsa_meth) {
   }
   return ret;
 }
+
+void ECDSA_METHOD_free(ECDSA_METHOD *ecdsa_meth) {
+  if(ecdsa_meth != NULL) {
+    OPENSSL_free(ecdsa_meth);
+  }
+}

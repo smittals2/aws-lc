@@ -169,11 +169,14 @@ OPENSSL_EXPORT ECDSA_METHOD *ECDSA_OpenSSL(void);
 // |ECDSA_METHOD| or NULL on error.
 OPENSSL_EXPORT ECDSA_METHOD *ECDSA_METHOD_new(const ECDSA_METHOD *ecdsa_meth);
 
+// ECDSA_METHOD_free frees the memory associated with |ecdsa_meth|.
+OPENSSL_EXPORT void ECDSA_METHOD_free(ECDSA_METHOD *ecdsa_meth);
 
 // EC_KEY_METHOD wrapping definitions
 #define EC_KEY_METHOD ECDSA_METHOD
 #define EC_KEY_OPENSSL ECDSA_OPENSSL
 #define EC_KEY_METHOD_new ECDSA_METHOD_new
+#define EC_KEY_METHOD_free ECDSA_METHOD_free
 
 // ASN.1 functions.
 
