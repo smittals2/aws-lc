@@ -462,3 +462,24 @@ int ecdsa_digestverify_no_self_test(const EVP_MD *md, const uint8_t *input,
 
   return ecdsa_do_verify_no_self_test(digest, digest_len, sig, eckey);
 }
+
+ECDSA_METHOD *ECDSA_OpenSSL(void) {
+  ECDSA_METHOD *ret;
+
+  ret = OPENSSL_zalloc(sizeof(ECDSA_METHOD));
+  if(ret == NULL) {
+    OPENSSL_PUT_ERROR(ECDSA, ERR_R_MALLOC_FAILURE);
+    return NULL;
+  }
+
+  return ret;
+}
+
+ECDSA_METHOD *ECDSA_METHOD_new(const ECDSA_METHOD *ecdsa_meth) {
+  ECDSA_METHOD *ret = ECDSA_OpenSSL();
+
+  if(ecdsa_meth) {
+    *ret = *ecdsa_meth;
+  }
+  return ret;
+}

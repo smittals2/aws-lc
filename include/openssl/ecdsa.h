@@ -155,6 +155,26 @@ OPENSSL_EXPORT int ECDSA_do_verify(const uint8_t *digest, size_t digest_len,
                                    const ECDSA_SIG *sig, const EC_KEY *key);
 
 
+// ECDSA_METHOD functions.
+
+// ECDSA_OpenSSL initializes a new ECDSA_METHOD structure. The new structure
+// will be zero-initialized. All the internal methods in the struct are NULL to
+// make it easier for the compiler/linker to drop unused functions. The wrapper
+// functions will select the appropriate default implementation.
+// Returns a newly-allocated |ECDSA_METHOD| or NULL on error.
+OPENSSL_EXPORT ECDSA_METHOD *ECDSA_OpenSSL(void);
+
+// ECDSA_METHOD_new calls |ECDSA_OpenSSL|. If |ecdsa_meth| is non-NULL,
+// the new structure will be a copy of it. Otherwise, returns a newly-allocated
+// |ECDSA_METHOD| or NULL on error.
+OPENSSL_EXPORT ECDSA_METHOD *ECDSA_METHOD_new(const ECDSA_METHOD *ecdsa_meth);
+
+
+// EC_KEY_METHOD wrapping definitions
+#define EC_KEY_METHOD ECDSA_METHOD
+#define EC_KEY_OPENSSL ECDSA_OPENSSL
+#define EC_KEY_METHOD_new ECDSA_METHOD_new
+
 // ASN.1 functions.
 
 // ECDSA_SIG_parse parses a DER-encoded ECDSA-Sig-Value structure from |cbs| and
