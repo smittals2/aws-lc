@@ -308,6 +308,8 @@ struct ecdsa_method_st {
   int flags;
 };
 
+// EC_KEY_METHOD implementation wraps ECDSA_METHOD
+#define EC_KEY_METHOD ECDSA_METHOD
 
 // Deprecated functions.
 
