@@ -489,3 +489,13 @@ void ECDSA_METHOD_free(ECDSA_METHOD *ecdsa_meth) {
     OPENSSL_free(ecdsa_meth);
   }
 }
+
+int ECDSA_set_method(EC_KEY *eckey, ECDSA_METHOD *meth) {
+  if(eckey == NULL || meth == NULL) {
+    OPENSSL_PUT_ERROR(ECDSA, ERR_R_PASSED_NULL_PARAMETER);
+    return 0;
+  }
+
+  eckey->ecdsa_meth = meth;
+  return 1;
+}
