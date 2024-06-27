@@ -305,11 +305,12 @@ struct ecdsa_method_st {
   int (*sign)(const uint8_t *digest, size_t digest_len, uint8_t *sig,
               unsigned int *sig_len, EC_KEY *eckey);
 
+  // sign_sig is like |sign| but returns a newly allocated |ECDSA_SIG| object
+  ECDSA_SIG *(*sign_sig)(const unsigned char *digest, int digest_len,
+                         EC_KEY *eckey);
+
   int flags;
 };
-
-// EC_KEY_METHOD implementation wraps ECDSA_METHOD
-#define EC_KEY_METHOD ECDSA_METHOD
 
 // Deprecated functions.
 

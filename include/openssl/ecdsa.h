@@ -180,6 +180,18 @@ OPENSSL_EXPORT int ECDSA_set_method(EC_KEY *eckey, ECDSA_METHOD *meth);
 // or NULL on error.
 OPENSSL_EXPORT ECDSA_METHOD *ECDSA_get_method(EC_KEY *ec);
 
+// ECDSA_METHOD_set_init sets the |init| and |finish| fields in |meth|.
+void ECDSA_METHOD_set_init(ECDSA_METHOD *meth, int (*init)(EC_KEY *key),
+                           int (*finish)(EC_KEY *key));
+
+// ECDSA_METHOD_set_sign sets the |sign| and |sign_sig| fields in |meth|.
+void ECDSA_METHOD_set_sign(ECDSA_METHOD *meth,
+                           int (*sign)(const uint8_t *digest, size_t digest_len,
+                                       uint8_t *sig, unsigned int *sig_len,
+                                       EC_KEY *eckey),
+                           ECDSA_SIG *(*sign_sig)(const unsigned char *digest,
+                                                  size_t digest_len,
+                                                  EC_KEY *eckey));
 
 // EC_KEY_METHOD wrapping definitions
 #define EC_KEY_METHOD ECDSA_METHOD
@@ -188,6 +200,8 @@ OPENSSL_EXPORT ECDSA_METHOD *ECDSA_get_method(EC_KEY *ec);
 #define EC_KEY_METHOD_free ECDSA_METHOD_free
 #define EC_KEY_set_method ECDSA_set_method
 #define EC_KEY_get_method ECDSA_get_method
+#define EC_KEY_METHOD_set_init ECDSA_METHOD_set_init
+#define EC_KEY_METHOD_set_sign ECDSA_METHOD_set_sign
 
 // ASN.1 functions.
 
