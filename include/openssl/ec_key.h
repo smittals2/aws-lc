@@ -306,7 +306,7 @@ struct ecdsa_method_st {
               unsigned int *sig_len, EC_KEY *eckey);
 
   // sign_sig is like |sign| but returns a newly allocated |ECDSA_SIG| object
-  ECDSA_SIG *(*sign_sig)(const unsigned char *digest, int digest_len,
+  ECDSA_SIG *(*sign_sig)(const unsigned char *digest, size_t digest_len,
                          EC_KEY *eckey);
 
   int flags;
