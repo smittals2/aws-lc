@@ -54,7 +54,7 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.] */
 
-#include <openssl/rsa.h>
+#include <openssl/h>
 
 #include <stdlib.h>
 #include <string.h>

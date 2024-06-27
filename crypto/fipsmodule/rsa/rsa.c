@@ -420,34 +420,20 @@ int RSA_meth_set_finish(RSA_METHOD *meth, int (*finish) (RSA *rsa)) {
 }
 
 int RSA_meth_set_priv_dec(RSA_METHOD *meth,
-                          int (*priv_dec) (int flen, const unsigned char *from,
-                                           unsigned char *to, RSA *rsa,
-                                           int padding)) {
-  meth->rsa_priv_dec = priv_dec;
+                          int (*decrypt)(RSA *rsa, size_t *out_len,
+                                  uint8_t *out, size_t max_out,
+                                  const uint8_t *in, size_t in_len,
+                                  int padding)) {
+  meth->decrypt = decrypt;
   return 1;
 }
 
 int RSA_meth_set_priv_enc(RSA_METHOD *meth,
-                          int (*priv_enc) (int flen, const unsigned char *from,
-                                           unsigned char *to, RSA *rsa,
-                                           int padding)) {
-  meth->rsa_priv_enc = priv_enc;
-  return 1;
-}
-
-int RSA_meth_set_pub_dec(RSA_METHOD *meth,
-                         int (*pub_dec) (int flen, const unsigned char *from,
-                                         unsigned char *to, RSA *rsa,
-                                         int padding)) {
-  meth->rsa_pub_dec = pub_dec;
-  return 1;
-}
-
-int RSA_meth_set_pub_enc(RSA_METHOD *meth,
-                         int (*pub_enc) (int flen, const unsigned char *from,
-                                         unsigned char *to, RSA *rsa,
-                                         int padding)) {
-  meth->rsa_pub_enc = pub_enc;
+                          int (*sign_raw)(RSA *rsa, size_t *out_len,
+                                  uint8_t *out, size_t max_out,
+                                  const uint8_t *in, size_t in_len,
+                                  int padding)) {
+  meth->sign_raw = sign_raw;
   return 1;
 }
 
