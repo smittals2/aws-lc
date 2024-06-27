@@ -181,11 +181,11 @@ OPENSSL_EXPORT int ECDSA_set_method(EC_KEY *eckey, ECDSA_METHOD *meth);
 OPENSSL_EXPORT ECDSA_METHOD *ECDSA_get_method(EC_KEY *ec);
 
 // ECDSA_METHOD_set_init sets the |init| and |finish| fields in |meth|.
-void ECDSA_METHOD_set_init(ECDSA_METHOD *meth, int (*init)(EC_KEY *key),
+OPENSSL_EXPORT void ECDSA_METHOD_set_init(ECDSA_METHOD *meth, int (*init)(EC_KEY *key),
                            int (*finish)(EC_KEY *key));
 
 // ECDSA_METHOD_set_sign sets the |sign| and |sign_sig| fields in |meth|.
-void ECDSA_METHOD_set_sign(ECDSA_METHOD *meth,
+OPENSSL_EXPORT void ECDSA_METHOD_set_sign(ECDSA_METHOD *meth,
                            int (*sign)(const uint8_t *digest, size_t digest_len,
                                        uint8_t *sig, unsigned int *sig_len,
                                        EC_KEY *eckey),
@@ -195,7 +195,7 @@ void ECDSA_METHOD_set_sign(ECDSA_METHOD *meth,
 
 // EC_KEY_METHOD wrapping definitions
 #define EC_KEY_METHOD ECDSA_METHOD
-#define EC_KEY_OPENSSL ECDSA_OPENSSL
+#define EC_KEY_OpenSSL ECDSA_OpenSSL
 #define EC_KEY_METHOD_new ECDSA_METHOD_new
 #define EC_KEY_METHOD_free ECDSA_METHOD_free
 #define EC_KEY_set_method ECDSA_set_method

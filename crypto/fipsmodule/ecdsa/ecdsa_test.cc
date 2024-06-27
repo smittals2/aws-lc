@@ -177,6 +177,42 @@ static void TestTamperedSig(API api, const uint8_t *digest,
   VerifyECDSASig(api, digest, digest_len, ecdsa_sig, eckey, 1);
 }
 
+// WIP Test
+static int sign(const uint8_t *digest, size_t digest_len, uint8_t *sig,
+                unsigned int *sig_len, EC_KEY *eckey) {
+  return 1;
+}
+
+static ECDSA_SIG *sign_sig(const unsigned char *digest, size_t digest_len,
+      EC_KEY *eckey) {
+  return NULL;
+}
+
+static int init(EC_KEY *key) {
+  return 1;
+}
+
+static int finish(EC_KEY *key) {
+  return 1;
+}
+
+TEST(ECDSATest, ECDSAMETHOD) {
+  // EC_KEY_METHOD API is used to test since it directly points to its ECDSA
+  // counterparts
+
+  EC_KEY_METHOD *meth = EC_KEY_METHOD_new(EC_KEY_OpenSSL());
+  EC_KEY *key = EC_KEY_new();
+  EC_KEY_set_method(key, meth);
+
+  ASSERT_EQ(meth, EC_KEY_get_method(key));
+
+  EC_KEY_METHOD_set_sign(meth, sign, sign_sig);
+  EC_KEY_METHOD_set_init(meth, init, finish);
+
+  EC_KEY_METHOD_free(meth);
+
+}
+
 TEST(ECDSATest, BuiltinCurves) {
   // Fill digest values with some random data.
   uint8_t digest[20], wrong_digest[20];
