@@ -63,6 +63,10 @@ OPENSSL_EXPORT int ENGINE_set_ECDSA_method(ENGINE *engine,
                                            size_t method_size);
 OPENSSL_EXPORT ECDSA_METHOD *ENGINE_get_ECDSA_method(const ENGINE *engine);
 
+OPENSSL_EXPORT int ENGINE_set_EC_KEY_METHOD(ENGINE *engine,
+                                           const EC_KEY_METHOD *method,
+                                           size_t method_size);
+OPENSSL_EXPORT EC_KEY_METHOD *ENGINE_get_EC_KEY_METHOD(const ENGINE *engine);
 
 // Generic method functions.
 //

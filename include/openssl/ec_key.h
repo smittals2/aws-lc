@@ -325,6 +325,10 @@ struct ec_key_method_st {
     int (*sign)(const uint8_t *digest, size_t digest_len, uint8_t *sig,
                 unsigned int *sig_len, EC_KEY *eckey);
 
+    // sign_sig is like sign but returns a newly allocated |ECDSA_SIG|
+    ECDSA_SIG *(*sign_sig)(const unsigned char *dgst, int dgstlen,
+            EC_KEY *eckey);
+
     int flags;
 };
 

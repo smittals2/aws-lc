@@ -79,6 +79,16 @@ ECDSA_METHOD *ENGINE_get_ECDSA_method(const ENGINE *engine) {
   return engine->ecdsa_method;
 }
 
+int ENGINE_set_EC_KEY_METHOD(ENGINE *engine, const EC_KEY_METHOD *method,
+                                            size_t method_size) {
+  return set_method((void **)&engine->ecdsa_method, method, method_size,
+                    sizeof(EC_KEY_METHOD));
+}
+
+EC_KEY_METHOD *ENGINE_get_EC_KEY_METHOD(const ENGINE *engine) {
+  return engine->ecdsa_method;
+}
+
 void METHOD_ref(void *method_in) {
   assert(((struct openssl_method_common_st*) method_in)->is_static);
 }
