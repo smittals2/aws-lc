@@ -331,6 +331,8 @@ struct ec_key_method_st {
     ECDSA_SIG *(*sign_sig)(const unsigned char *digest, size_t digest_len,
             EC_KEY *eckey);
 
+    ECDSA_METHOD *cached_ecdsa_meth;
+
     int flags;
 };
 
