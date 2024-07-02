@@ -66,17 +66,46 @@ RSA_METHOD *ENGINE_get_RSA_method(const ENGINE *engine) {
   return engine->rsa_method;
 }
 
+// memory Ownership issue here. Do we free passed in ECDSA_METHOD which will
+// create behavioral change since users could technically still access the method
+// when references were passed in before. Or change contract to make
+// consumer free the object. 
 int ENGINE_set_ECDSA_method(ENGINE *engine, const ECDSA_METHOD *method,
                             size_t method_size) {
 
   // Refactor to EC_KEY_METHOD and then set
+  EC_KEY_METHOD *ret = OPENSSL_zalloc(sizeof(EC_KEY_METHOD));
+
+  ret->common = method->common;
+
+  ret->init = method->init;
+  ret->finish = method->finish;
+  ret->sign = method->sign;
+  ret->group_order_size = method->group_order_size;
+  ret->app_data = method->app_data;
+  ret->flags = method->flags;
+
   return set_method((void **)&engine->ecdsa_method, method, method_size,
-                    sizeof(ECDSA_METHOD));
+                    sizeof(EC_KEY_METHOD));
 }
 
+// Will we have to change the function contract since now we are allocating
+// and returning a new struct but before memory was automatically managed
+// as a part of the engine object???
 ECDSA_METHOD *ENGINE_get_ECDSA_method(const ENGINE *engine) {
   // Refactor from EC_KEY_METHOD and then return
-  return engine->ecdsa_method;
+  ECDSA_METHOD *ret = OPENSSL_zalloc(sizeof(ECDSA_METHOD));
+
+  ret->common = engine->ecdsa_method->common;
+
+  ret->init = engine->ecdsa_method->init;
+  ret->finish = engine->ecdsa_method->finish;
+  ret->sign = engine->ecdsa_method->sign;
+  ret->group_order_size = engine->ecdsa_method->group_order_size;
+  ret->app_data = engine->ecdsa_method->app_data;
+  ret->flags = engine->ecdsa_method->flags;
+
+  return ret;
 }
 
 int ENGINE_set_EC_KEY_METHOD(ENGINE *engine, const EC_KEY_METHOD *method,
