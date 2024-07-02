@@ -235,6 +235,20 @@ int RSA_meth_set_priv_enc(RSA_METHOD *meth,
                                           const uint8_t *in, size_t in_len,
                                           int padding));
 
+// RSA_meth_set_pub_dec sets the |verify_raw| field of |meth|
+int RSA_meth_set_pub_dec(RSA_METHOD *meth,
+                         int (*verify_raw)(RSA *rsa, size_t *out_len,
+                                           uint8_t *out, size_t max_out,
+                                           const uint8_t *in, size_t in_len,
+                                           int padding));
+
+// RSA_meth_set_pub_enc sets the |encrypt| field of |meth|
+int RSA_meth_set_pub_enc(RSA_METHOD *meth,
+                         int (*encrypt)(RSA *rsa, size_t *out_len,
+                                        uint8_t *out, size_t max_out,
+                                        const uint8_t *in, size_t in_len,
+                                        int padding));
+
 // RSA_meth_set_priv_enc sets the |app_data| field of |meth|
 int RSA_meth_set0_app_data(RSA_METHOD *meth, void *app_data);
 
@@ -872,6 +886,11 @@ struct rsa_meth_st {
                   const uint8_t *in, size_t in_len, int padding);
   int (*decrypt)(RSA *rsa, size_t *out_len, uint8_t *out, size_t max_out,
                  const uint8_t *in, size_t in_len, int padding);
+
+  int (*encrypt)(RSA *rsa, size_t *out_len, uint8_t *out, size_t max_out,
+                 const uint8_t *in, size_t in_len, int padding);
+  int (*verify_raw)(RSA *rsa, size_t *out_len, uint8_t *out, size_t max_out,
+                    const uint8_t *in, size_t in_len, int padding);
 
   // private_transform takes a big-endian integer from |in|, calculates the
   // d'th power of it, modulo the RSA modulus and writes the result as a

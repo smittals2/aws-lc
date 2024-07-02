@@ -437,6 +437,24 @@ int RSA_meth_set_priv_enc(RSA_METHOD *meth,
   return 1;
 }
 
+int RSA_meth_set_pub_dec(RSA_METHOD *meth,
+                          int (*verify_raw)(RSA *rsa, size_t *out_len,
+                                         uint8_t *out, size_t max_out,
+                                         const uint8_t *in, size_t in_len,
+                                         int padding)) {
+  meth->verify_raw = verify_raw;
+  return 1;
+}
+
+int RSA_meth_set_pub_enc(RSA_METHOD *meth,
+                          int (*encrypt)(RSA *rsa, size_t *out_len,
+                                          uint8_t *out, size_t max_out,
+                                          const uint8_t *in, size_t in_len,
+                                          int padding)) {
+  meth->encrypt = encrypt;
+  return 1;
+}
+
 int RSA_meth_set0_app_data(RSA_METHOD *meth, void *app_data)
 {
   meth->app_data = app_data;
