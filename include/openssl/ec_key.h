@@ -308,6 +308,8 @@ struct ecdsa_method_st {
   int flags;
 };
 
+// EC_KEY_METHOD
+
 struct ec_key_method_st {
     struct openssl_method_common_st common;
 
@@ -326,12 +328,32 @@ struct ec_key_method_st {
                 unsigned int *sig_len, EC_KEY *eckey);
 
     // sign_sig is like sign but returns a newly allocated |ECDSA_SIG|
-    ECDSA_SIG *(*sign_sig)(const unsigned char *dgst, int dgstlen,
+    ECDSA_SIG *(*sign_sig)(const unsigned char *digest, size_t digest_len,
             EC_KEY *eckey);
 
     int flags;
 };
 
+OPENSSL_EXPORT EC_KEY_METHOD *EC_KEY_OpenSSL(void);
+
+OPENSSL_EXPORT EC_KEY_METHOD *EC_KEY_METHOD_new(const EC_KEY_METHOD *ec_key_meth);
+
+OPENSSL_EXPORT void EC_KEY_METHOD_free(EC_KEY_METHOD *ec_key_meth);
+
+OPENSSL_EXPORT int EC_KEY_set_method(EC_KEY *ec, EC_KEY_METHOD *meth);
+
+OPENSSL_EXPORT EC_KEY_METHOD *EC_KEY_get_method(EC_KEY *ec);
+
+OPENSSL_EXPORT void EC_KEY_METHOD_set_init(EC_KEY_METHOD *meth, int (*init)(EC_KEY *key),
+                            int (*finish)(EC_KEY *key));
+
+OPENSSL_EXPORT void EC_KEY_METHOD_set_sign(EC_KEY_METHOD *meth,
+                            int (*sign)(const uint8_t *digest, size_t digest_len,
+                                        uint8_t *sig, unsigned int *sig_len,
+                                        EC_KEY *eckey),
+                            ECDSA_SIG *(*sign_sig)(const unsigned char *digest,
+                                                   size_t digest_len,
+                                                   EC_KEY *eckey));
 // Deprecated functions.
 
 // d2i_ECPrivateKey parses a DER-encoded ECPrivateKey structure (RFC 5915) from

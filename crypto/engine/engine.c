@@ -85,7 +85,7 @@ int ENGINE_set_ECDSA_method(ENGINE *engine, const ECDSA_METHOD *method,
   ret->app_data = method->app_data;
   ret->flags = method->flags;
 
-  return set_method((void **)&engine->ecdsa_method, method, method_size,
+  return set_method((void **)&engine->ecdsa_method, ret, method_size,
                     sizeof(EC_KEY_METHOD));
 }
 

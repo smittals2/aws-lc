@@ -309,9 +309,9 @@ ECDSA_SIG *ECDSA_do_sign(const uint8_t *digest, size_t digest_len,
                          const EC_KEY *eckey) {
   boringssl_ensure_ecc_self_test();
 
-  if (eckey->ecdsa_meth && eckey->ecdsa_meth->sign) {
-    OPENSSL_PUT_ERROR(ECDSA, ECDSA_R_NOT_IMPLEMENTED);
-    return NULL;
+  if (eckey->ecdsa_meth && eckey->ecdsa_meth->sign_sig) {
+    // Discarding const and passing in
+    return eckey->ecdsa_meth->sign_sig(digest, digest_len, (EC_KEY *) eckey);
   }
 
   const EC_GROUP *group = EC_KEY_get0_group(eckey);

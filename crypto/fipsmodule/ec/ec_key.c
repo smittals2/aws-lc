@@ -576,3 +576,80 @@ void *EC_KEY_get_ex_data(const EC_KEY *d, int idx) {
 }
 
 void EC_KEY_set_asn1_flag(EC_KEY *key, int flag) {}
+
+EC_KEY_METHOD *EC_KEY_OpenSSL(void) {
+  EC_KEY_METHOD *ret;
+
+  ret = OPENSSL_zalloc(sizeof(EC_KEY_METHOD));
+  if(ret == NULL) {
+    OPENSSL_PUT_ERROR(EC, ERR_R_MALLOC_FAILURE);
+    return NULL;
+  }
+
+  return ret;
+}
+
+EC_KEY_METHOD *EC_KEY_METHOD_new(const EC_KEY_METHOD *ec_key_meth) {
+  EC_KEY_METHOD *ret = EC_KEY_OpenSSL();
+
+  if(ec_key_meth) {
+    *ret = *ec_key_meth;
+  }
+  return ret;
+}
+
+void EC_KEY_METHOD_free(EC_KEY_METHOD *ec_key_meth) {
+  if(ec_key_meth != NULL) {
+    OPENSSL_free(ec_key_meth);
+  }
+}
+
+int EC_KEY_set_method(EC_KEY *ec, EC_KEY_METHOD *meth) {
+  if(ec == NULL || meth == NULL) {
+    OPENSSL_PUT_ERROR(EC, ERR_R_PASSED_NULL_PARAMETER);
+    return 0;
+  }
+
+  ec->ecdsa_meth = meth;
+  return 1;
+}
+
+EC_KEY_METHOD *EC_KEY_get_method(EC_KEY *ec) {
+  if(ec == NULL) {
+    OPENSSL_PUT_ERROR(EC, ERR_R_PASSED_NULL_PARAMETER);
+    return NULL;
+  }
+
+  return ec->ecdsa_meth;
+}
+
+void EC_KEY_METHOD_set_init(EC_KEY_METHOD *meth, int (*init)(EC_KEY *key),
+                           int (*finish)(EC_KEY *key)) {
+  if(meth == NULL) {
+    OPENSSL_PUT_ERROR(EC, ERR_R_PASSED_NULL_PARAMETER);
+    return;
+  }
+
+  meth->init = init;
+  meth->finish = finish;
+}
+
+void EC_KEY_METHOD_set_sign(EC_KEY_METHOD *meth,
+                           int (*sign)(const uint8_t *digest, size_t digest_len,
+                                       uint8_t *sig, unsigned int *sig_len,
+                                       EC_KEY *eckey),
+                           ECDSA_SIG *(*sign_sig)(const unsigned char *digest,
+                                                  size_t digest_len,
+                                                  EC_KEY *eckey)) {
+  if(meth == NULL) {
+    OPENSSL_PUT_ERROR(EC, ERR_R_PASSED_NULL_PARAMETER);
+    return;
+  }
+
+  meth->sign = sign;
+  meth->sign_sig = sign_sig;
+}
+
+
+
+
