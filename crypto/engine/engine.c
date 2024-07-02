@@ -69,7 +69,7 @@ RSA_METHOD *ENGINE_get_RSA_method(const ENGINE *engine) {
 // memory Ownership issue here. Do we free passed in ECDSA_METHOD which will
 // create behavioral change since users could technically still access the method
 // when references were passed in before. Or change contract to make
-// consumer free the object. 
+// consumer free the object.
 int ENGINE_set_ECDSA_method(ENGINE *engine, const ECDSA_METHOD *method,
                             size_t method_size) {
 

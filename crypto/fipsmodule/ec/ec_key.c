@@ -113,7 +113,20 @@ EC_KEY *EC_KEY_new_method(const ENGINE *engine) {
   if (engine) {
     // File includes internal and therefore has direct access to ecdsa_meth.
     // Refactor to EC_KEY_METHOD before setting.
-    ret->ecdsa_meth = ENGINE_get_ECDSA_method(engine);
+    // Here direct reference is being passed to new object. Ownership of old
+    // object remains with passed in Engine.
+    ECDSA_METHOD *method = ENGINE_get_ECDSA_method(engine);
+    EC_KEY_METHOD *new_meth = OPENSSL_zalloc(sizeof(EC_KEY_METHOD));
+    new_meth->common = method->common;
+
+    new_meth->init = method->init;
+    new_meth->finish = method->finish;
+    new_meth->sign = method->sign;
+    new_meth->group_order_size = method->group_order_size;
+    new_meth->app_data = method->app_data;
+    new_meth->flags = method->flags;
+
+    ret->ecdsa_meth = new_meth;
   }
   if (ret->ecdsa_meth) {
     METHOD_ref(ret->ecdsa_meth);
