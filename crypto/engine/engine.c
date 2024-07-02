@@ -28,7 +28,8 @@
 
 struct engine_st {
   RSA_METHOD *rsa_method;
-  ECDSA_METHOD *ecdsa_method;
+  // Changed to EC_KEY_METHOD
+  EC_KEY_METHOD *ecdsa_method;
 };
 
 ENGINE *ENGINE_new(void) { return OPENSSL_zalloc(sizeof(ENGINE)); }
@@ -67,11 +68,14 @@ RSA_METHOD *ENGINE_get_RSA_method(const ENGINE *engine) {
 
 int ENGINE_set_ECDSA_method(ENGINE *engine, const ECDSA_METHOD *method,
                             size_t method_size) {
+
+  // Refactor to EC_KEY_METHOD and then set
   return set_method((void **)&engine->ecdsa_method, method, method_size,
                     sizeof(ECDSA_METHOD));
 }
 
 ECDSA_METHOD *ENGINE_get_ECDSA_method(const ENGINE *engine) {
+  // Refactor from EC_KEY_METHOD and then return
   return engine->ecdsa_method;
 }
 

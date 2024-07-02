@@ -111,6 +111,8 @@ EC_KEY *EC_KEY_new_method(const ENGINE *engine) {
   }
 
   if (engine) {
+    // File includes internal and therefore has direct access to ecdsa_meth.
+    // Refactor to EC_KEY_METHOD before setting.
     ret->ecdsa_meth = ENGINE_get_ECDSA_method(engine);
   }
   if (ret->ecdsa_meth) {
