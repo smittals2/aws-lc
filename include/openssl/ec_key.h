@@ -309,17 +309,27 @@ struct ecdsa_method_st {
 };
 
 struct eckey_method_st {
+    // this is an extra field as compared to openssl. But I assume we need it?
     struct openssl_method_common_st common;
 
-    void *app_data;
+    // Delete this...
+    //void *app_data;
+
+    // Concept of a name in openssl
+    const char *name;
 
     int (*init)(EC_KEY *key);
     int (*finish)(EC_KEY *key);
 
-    // group_order_size returns the number of bytes needed to represent the order
-    // of the group. This is used to calculate the maximum size of an ECDSA
-    // signature in |ECDSA_size|.
-    size_t (*group_order_size)(const EC_KEY *key);
+    // New methods, make sure to plumb these through in appropriate workflows
+    // Some we may enforce null for
+    int (*copy)(EC_KEY *dest, const EC_KEY *src);
+    int (*set_group)(EC_KEY *key, const EC_GROUP *group);
+    int (*set_private)(EC_KEY *key, const BIGNUM *priv_key);
+    int (*set_public)(EC_KEY *key, const EC_POINT *pub_key);
+    int (*keygen)(EC_KEY *key);
+    int (*compute_key)(unsigned char **out, size_t *out_len,
+                       const EC_POINT *pub_key, const EC_KEY *ecdh);
 
     // Different signature from ecdsa_method to mimic OpenSSL
     // uint8_t vs unsigned char?? (openssl uses latter)
@@ -329,8 +339,20 @@ struct eckey_method_st {
             uint8_t *sig, unsigned int *siglen, const BIGNUM *k_inv,
                 const BIGNUM *r, EC_KEY *eckey);
 
+    // We don't support this, function pointer must stay NULL for now. May
+    // support in the future.
+    int (*sign_setup)(EC_KEY *eckey, BN_CTX *ctx_in, BIGNUM **k_inv,
+                      BIGNUM **r);
+    ECDSA_SIG *(*sign_sig)(const uint8_t *digest, unsigned int digest_len,
+                           const BIGNUM *in_kinv, const BIGNUM *in_r,
+                           EC_KEY *eckey);
 
+    int (*verify)(int type, const uint8_t *digest, unsigned int digest_len,
+                  const uint8_t *sig, unsigned int sig_len, EC_KEY *eckey);
+    int (*verify_sig)(const uint8_t *digest, unsigned int digest_len,
+                      const ECDSA_SIG *sig, EC_KEY *eckey);
 
+    // int vs int32_t?
     int flags;
 };
 
