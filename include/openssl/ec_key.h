@@ -308,6 +308,31 @@ struct ecdsa_method_st {
   int flags;
 };
 
+struct eckey_method_st {
+    struct openssl_method_common_st common;
+
+    void *app_data;
+
+    int (*init)(EC_KEY *key);
+    int (*finish)(EC_KEY *key);
+
+    // group_order_size returns the number of bytes needed to represent the order
+    // of the group. This is used to calculate the maximum size of an ECDSA
+    // signature in |ECDSA_size|.
+    size_t (*group_order_size)(const EC_KEY *key);
+
+    // Different signature from ecdsa_method to mimic OpenSSL
+    // uint8_t vs unsigned char?? (openssl uses latter)
+    // We don't support custom values for k_inv and r and both parameters
+    // must be NULL. This may change in the future if support is added.
+    int (*sign)(int type, const uint8_t *digest, unsigned int digest_len,
+            uint8_t *sig, unsigned int *siglen, const BIGNUM *k_inv,
+                const BIGNUM *r, EC_KEY *eckey);
+
+
+
+    int flags;
+};
 
 // Deprecated functions.
 

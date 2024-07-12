@@ -766,7 +766,10 @@ struct ec_key_st {
 
   CRYPTO_refcount_t references;
 
-  ECDSA_METHOD *ecdsa_meth;
+  union {
+      ECDSA_METHOD *ecdsa_meth;
+      EC_KEY_METHOD *eckey_method;
+  } eckey_type;
 
   CRYPTO_EX_DATA ex_data;
 } /* EC_KEY */;

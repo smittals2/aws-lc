@@ -28,7 +28,10 @@
 
 struct engine_st {
   RSA_METHOD *rsa_method;
-  ECDSA_METHOD *ecdsa_method;
+  union {
+      ECDSA_METHOD *ecdsa_method;
+      EC_KEY_METHOD *eckey_method;
+  } eckey_type;
 };
 
 ENGINE *ENGINE_new(void) { return OPENSSL_zalloc(sizeof(ENGINE)); }
