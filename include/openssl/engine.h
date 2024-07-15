@@ -63,6 +63,14 @@ OPENSSL_EXPORT int ENGINE_set_ECDSA_method(ENGINE *engine,
                                            size_t method_size);
 OPENSSL_EXPORT ECDSA_METHOD *ENGINE_get_ECDSA_method(const ENGINE *engine);
 
+
+// Method accessors for |EC_KEY_METHOD|
+//
+// These accessors do not take the size of the structure as a parameter
+// to maintain compatability with OpenSSL. The default size of
+// |EC_KEY_METHOD| is used.
+// At a time, only |EC_KEY_METHOD| or |ECDSA_METHOD| may be defined in an
+// |ENGINE| object. Otherwise, an error is thrown.
 OPENSSL_EXPORT int ENGINE_set_EC(ENGINE *engine, const EC_KEY_METHOD *method);
 
 OPENSSL_EXPORT const EC_KEY_METHOD *ENGINE_get_EC(const ENGINE *engine);
