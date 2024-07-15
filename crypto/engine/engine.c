@@ -70,12 +70,44 @@ RSA_METHOD *ENGINE_get_RSA_method(const ENGINE *engine) {
 
 int ENGINE_set_ECDSA_method(ENGINE *engine, const ECDSA_METHOD *method,
                             size_t method_size) {
-  return set_method((void **)&engine->ecdsa_method, method, method_size,
-                    sizeof(ECDSA_METHOD));
+  // Only one custom implementation may be defined per ENGINE for an EC_KEY
+  if(engine->eckey_type.eckey_method) {
+    OPENSSL_PUT_ERROR(engine, ENGINE_R_OPERATION_NOT_SUPPORTED);
+    return 0;
+  }
+
+  return set_method((void **)&engine->eckey_type.ecdsa_method, method,
+                    method_size, sizeof(ECDSA_METHOD));
 }
 
 ECDSA_METHOD *ENGINE_get_ECDSA_method(const ENGINE *engine) {
-  return engine->ecdsa_method;
+  if(engine->eckey_type.eckey_method) {
+    OPENSSL_PUT_ERROR(engine, ENGINE_R_OPERATION_NOT_SUPPORTED);
+    return 0;
+  }
+
+  return engine->eckey_type.ecdsa_method;
+}
+
+// We don't take in a user defined size for this method, so default is passed in
+int ENGINE_set_EC(ENGINE *engine, const EC_KEY_METHOD *method) {
+  // Only one custom implementation may be defined per ENGINE for an EC_KEY
+  if(engine->eckey_type.ecdsa_method) {
+    OPENSSL_PUT_ERROR(engine, ENGINE_R_OPERATION_NOT_SUPPORTED);
+    return 0;
+  }
+
+  return set_method((void **)&engine->eckey_type.eckey_method, method,
+                    sizeof(EC_KEY_METHOD), sizeof(EC_KEY_METHOD));
+}
+
+const EC_KEY_METHOD *ENGINE_get_EC(const ENGINE *engine) {
+  if(engine->eckey_type.ecdsa_method) {
+    OPENSSL_PUT_ERROR(engine, ENGINE_R_OPERATION_NOT_SUPPORTED);
+    return 0;
+  }
+
+  return engine->eckey_type.eckey_method;
 }
 
 void METHOD_ref(void *method_in) {
