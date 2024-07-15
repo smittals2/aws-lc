@@ -325,7 +325,11 @@ struct eckey_method_st {
     // Some we may enforce null for
     int (*copy)(EC_KEY *dest, const EC_KEY *src);
     int (*set_group)(EC_KEY *key, const EC_GROUP *group);
+
+    // We store priv_key as EC_WRAPPED_SCALAR but OpenSSL does BIGNUM.
+    // Need to wrap and set.
     int (*set_private)(EC_KEY *key, const BIGNUM *priv_key);
+
     int (*set_public)(EC_KEY *key, const EC_POINT *pub_key);
     int (*keygen)(EC_KEY *key);
     int (*compute_key)(unsigned char **out, size_t *out_len,
@@ -343,6 +347,10 @@ struct eckey_method_st {
     // support in the future.
     int (*sign_setup)(EC_KEY *eckey, BN_CTX *ctx_in, BIGNUM **k_inv,
                       BIGNUM **r);
+
+    // Lower level sign functionality. We currently enforce Null for in_r and
+    // in_kinv for lack of support but we may allow consumers to set custom
+    // implementations in the future.
     ECDSA_SIG *(*sign_sig)(const uint8_t *digest, unsigned int digest_len,
                            const BIGNUM *in_kinv, const BIGNUM *in_r,
                            EC_KEY *eckey);
