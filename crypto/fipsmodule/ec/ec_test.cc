@@ -30,6 +30,7 @@
 #include <openssl/nid.h>
 #include <openssl/obj.h>
 #include <openssl/span.h>
+#include <openssl/engine.h>
 
 #include "../../ec_extra/internal.h"
 #include "../../test/file_test.h"
@@ -2412,4 +2413,19 @@ TEST(ECTest, FelemBytes) {
     ASSERT_TRUE(test_group);
     ASSERT_EQ(test_group.get()->field.N.width, expected_felem_words);
   }
+}
+
+TEST(ECTest, ECEngine) {
+  ENGINE *custom = ENGINE_new();
+
+  ASSERT_TRUE(custom);
+  ASSERT_FALSE(ENGINE_get_ECDSA(custom));
+
+  auto *impl = (ECDSA_METHOD*) OPENSSL_zalloc(sizeof(ECDSA_METHOD));
+  ASSERT_TRUE(impl);
+
+  ENGINE_set_ECDSA(custom, impl);
+  ASSERT_TRUE(ENGINE_get_ECDSA(custom));
+
+  ENGINE_free(custom);
 }
