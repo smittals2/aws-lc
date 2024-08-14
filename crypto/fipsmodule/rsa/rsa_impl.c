@@ -1273,10 +1273,10 @@ int RSA_generate_key_fips(RSA *rsa, int bits, BN_GENCB *cb) {
   return ret;
 }
 
-DEFINE_METHOD_FUNCTION(RSA_METHOD, RSA_default_method) {
-  // All of the methods are NULL to make it easier for the compiler/linker to
-  // drop unused functions. The wrapper functions will select the appropriate
-  // |rsa_default_*| implementation.
+static RSA_METHOD RSA_default_method_storage;
+
+const RSA_METHOD *RSA_default_method(void) {
+  RSA_METHOD *out = &RSA_default_method_storage;
   OPENSSL_memset(out, 0, sizeof(RSA_METHOD));
-  out->common.is_static = 1;
+  return out;
 }

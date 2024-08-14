@@ -34,58 +34,43 @@ struct engine_st {
 ENGINE *ENGINE_new(void) { return OPENSSL_zalloc(sizeof(ENGINE)); }
 
 int ENGINE_free(ENGINE *engine) {
-  // Methods are currently required to be static so are not unref'ed.
+  OPENSSL_free(engine->rsa_method);
+  OPENSSL_free(engine->ecdsa_method);
   OPENSSL_free(engine);
   return 1;
 }
 
-// set_method takes a pointer to a method and its given size and sets
-// |*out_member| to point to it. This function might want to be extended in the
-// future to support making a copy of the method so that a stable ABI for
-// ENGINEs can be supported. But, for the moment, all *_METHODS must be
-// static.
-static int set_method(void **out_member, const void *method, size_t method_size,
+// set_method takes a pointer to a method and its size and sets
+// |*out_member| to a copy of it.
+static int set_method(void **out_member, const void *method,
                       size_t compiled_size) {
-  const struct openssl_method_common_st *common = method;
-  if (method_size != compiled_size || !common->is_static) {
+  void *copy = OPENSSL_zalloc(compiled_size);
+  if (copy == NULL) {
     return 0;
   }
 
-  *out_member = (void*) method;
+  OPENSSL_memcpy(copy, method, compiled_size);
+
+  *out_member = copy;
   return 1;
 }
 
-int ENGINE_set_RSA_method(ENGINE *engine, const RSA_METHOD *method,
-                         size_t method_size) {
-  return set_method((void **)&engine->rsa_method, method, method_size,
+int ENGINE_set_RSA(ENGINE *engine, const RSA_METHOD *method) {
+  return set_method((void **)&engine->rsa_method, method,
                     sizeof(RSA_METHOD));
 }
 
-RSA_METHOD *ENGINE_get_RSA_method(const ENGINE *engine) {
+const RSA_METHOD *ENGINE_get_RSA(const ENGINE *engine) {
   return engine->rsa_method;
 }
 
-int ENGINE_set_ECDSA_method(ENGINE *engine, const ECDSA_METHOD *method,
-                            size_t method_size) {
-  return set_method((void **)&engine->ecdsa_method, method, method_size,
+int ENGINE_set_ECDSA(ENGINE *engine, const ECDSA_METHOD *method) {
+  return set_method((void **)&engine->ecdsa_method, method,
                     sizeof(ECDSA_METHOD));
 }
 
-ECDSA_METHOD *ENGINE_get_ECDSA_method(const ENGINE *engine) {
+const ECDSA_METHOD *ENGINE_get_ECDSA(const ENGINE *engine) {
   return engine->ecdsa_method;
-}
-
-void METHOD_ref(void *method_in) {
-  assert(((struct openssl_method_common_st*) method_in)->is_static);
-}
-
-void METHOD_unref(void *method_in) {
-  struct openssl_method_common_st *method = method_in;
-
-  if (method == NULL) {
-    return;
-  }
-  assert(method->is_static);
 }
 
 OPENSSL_DECLARE_ERROR_REASON(ENGINE, OPERATION_NOT_SUPPORTED)

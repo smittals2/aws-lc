@@ -70,7 +70,7 @@ extern "C" {
 typedef struct bn_blinding_st BN_BLINDING;
 
 struct rsa_st {
-  RSA_METHOD *meth;
+  const RSA_METHOD *meth;
 
   BIGNUM *n;
   BIGNUM *e;
@@ -128,6 +128,11 @@ struct rsa_st {
 
 // Default implementations of RSA operations.
 
+// RSA_default_method returns a pointer to zeroed out static memory the size of
+// |RSA_METHOD|. This is different from OpenSSL which returns pointers to the
+// default functions. All of the methods are NULL to make it easier for the
+// compiler/linker to drop unused functions. The wrapper functions will select
+// the appropriate |rsa_default_*| implementation.
 const RSA_METHOD *RSA_default_method(void);
 
 size_t rsa_default_size(const RSA *rsa);
