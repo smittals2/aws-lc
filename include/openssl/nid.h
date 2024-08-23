@@ -4342,6 +4342,10 @@ extern "C" {
 #define SN_MLKEM1024IPD "MLKEM1024IPD"
 #define NID_MLKEM1024IPD 987
 
+#define SN_tls1_prf "TLS1-PRF"
+#define LN_tls1_prf "tls1-prf"
+#define NID_tls1_prf 988
+
 #if defined(__cplusplus)
 } /* extern C */
 #endif
