@@ -226,6 +226,9 @@ int EVP_RSA_PKEY_CTX_ctrl(EVP_PKEY_CTX *ctx, int optype, int cmd, int p1, void *
 #define EVP_PKEY_CTRL_HKDF_KEY (EVP_PKEY_ALG_CTRL + 16)
 #define EVP_PKEY_CTRL_HKDF_SALT (EVP_PKEY_ALG_CTRL + 17)
 #define EVP_PKEY_CTRL_HKDF_INFO (EVP_PKEY_ALG_CTRL + 18)
+#define EVP_PKEY_CTRL_TLS_MD (EVP_PKEY_ALG_CTRL + 19)
+#define EVP_PKEY_CTRL_TLS_SECRET (EVP_PKEY_ALG_CTRL + 20)
+#define EVP_PKEY_CTRL_TLS_SEED (EVP_PKEY_ALG_CTRL + 21)
 
 struct evp_pkey_ctx_st {
   // Method associated with this operation
@@ -320,7 +323,7 @@ typedef struct {
 // HMAC_KEY_new allocates and zeroizes a |HMAC_KEY| for internal use.
 HMAC_KEY *HMAC_KEY_new(void);
 
-#define FIPS_EVP_PKEY_METHODS 5
+#define FIPS_EVP_PKEY_METHODS 6
 
 #ifdef ENABLE_DILITHIUM
 #define NON_FIPS_EVP_PKEY_METHODS 4
@@ -339,6 +342,7 @@ const EVP_PKEY_METHOD *EVP_PKEY_rsa_pss_pkey_meth(void);
 const EVP_PKEY_METHOD *EVP_PKEY_ec_pkey_meth(void);
 const EVP_PKEY_METHOD *EVP_PKEY_hkdf_pkey_meth(void);
 const EVP_PKEY_METHOD *EVP_PKEY_hmac_pkey_meth(void);
+const EVP_PKEY_METHOD *EVP_PKEY_tls1_prf_pkey_meth(void);
 
 #if defined(__cplusplus)
 }  // extern C

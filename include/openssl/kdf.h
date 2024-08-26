@@ -169,6 +169,24 @@ OPENSSL_EXPORT int EVP_PKEY_CTX_add1_hkdf_info(EVP_PKEY_CTX *ctx,
                                                const uint8_t *info,
                                                size_t info_len);
 
+// EVP_PKEY_CTX_set_tls1_prf_md sets the message digest |md| associated with the
+// TLS PRF. EVP_md5_sha1() is treated as a special case which uses the PRF
+// algorithm using both MD5 and SHA1 as used in TLS 1.0 and 1.1. Returns one
+// on success and zero on failure.
+OPENSSL_EXPORT int EVP_PKEY_CTX_set_tls1_prf_md(EVP_PKEY_CTX *pctx,
+                                                const EVP_MD *md);
+
+// EVP_PKEY_CTX_set1_tls1_prf_secret sets the secret value of the TLS PRF to
+// |sec_len| bytes of the buffer |sec|. Any existing secret value is replaced
+// and any seed is reset. Returns one on success and zero on failure.
+OPENSSL_EXPORT int EVP_PKEY_CTX_set1_tls1_prf_secret(EVP_PKEY_CTX *pctx,
+                                                     uint8_t *sec, int sec_len);
+
+// EVP_PKEY_CTX_add1_tls1_prf_seed sets the seed to |seed_len| bytes of |seed|.
+// If a seed is already set, it is appended to the existing value. Returns one
+// on success and zero on failure.
+OPENSSL_EXPORT int EVP_PKEY_CTX_add1_tls1_prf_seed(EVP_PKEY_CTX *pctx,
+                                                   uint8_t *seed, int seed_len);
 
 #if defined(__cplusplus)
 }  // extern C
