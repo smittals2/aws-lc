@@ -22,8 +22,7 @@ typedef struct {
     size_t seed_len;
 } TLS1_PRF_PKEY_CTX;
 
-static int pkey_tls1_prf_init(EVP_PKEY_CTX *ctx)
-{
+static int pkey_tls1_prf_init(EVP_PKEY_CTX *ctx) {
   TLS1_PRF_PKEY_CTX *kctx;
 
   if(ctx == NULL) {
@@ -41,8 +40,7 @@ static int pkey_tls1_prf_init(EVP_PKEY_CTX *ctx)
   return 1;
 }
 
-static void pkey_tls1_prf_cleanup(EVP_PKEY_CTX *ctx)
-{
+static void pkey_tls1_prf_cleanup(EVP_PKEY_CTX *ctx) {
   TLS1_PRF_PKEY_CTX *kctx = ctx->data;
   if(kctx != NULL) {
     OPENSSL_free(kctx->sec);
@@ -52,8 +50,7 @@ static void pkey_tls1_prf_cleanup(EVP_PKEY_CTX *ctx)
   }
 }
 
-static int pkey_tls1_prf_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
-{
+static int pkey_tls1_prf_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2) {
   TLS1_PRF_PKEY_CTX *kctx = ctx->data;
 
   switch (type) {
@@ -96,8 +93,7 @@ static int pkey_tls1_prf_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
 }
 
 static int pkey_tls1_prf_derive(EVP_PKEY_CTX *ctx, uint8_t *out,
-                                size_t *out_len)
-{
+                                size_t *out_len) {
   TLS1_PRF_PKEY_CTX *kctx = ctx->data;
   if (kctx->md == NULL || kctx->sec == NULL) {
     OPENSSL_PUT_ERROR(EVP, EVP_R_MISSING_PARAMETERS);
