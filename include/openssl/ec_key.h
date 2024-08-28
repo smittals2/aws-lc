@@ -382,22 +382,34 @@ OPENSSL_EXPORT void EC_KEY_METHOD_set_init(EC_KEY_METHOD *meth,
                             int (*set_public)(EC_KEY *key,
                                               const EC_POINT *pub_key));
 
+
+
+void EC_KEY_METHOD_set_sign_impl(EC_KEY_METHOD *meth,
+                                        int (*sign)(int type, const uint8_t *digest,
+                                                    int digest_len, uint8_t *sig,
+                                                    unsigned int *siglen,
+                                                    const BIGNUM *k_inv,
+                                                    const BIGNUM *r, EC_KEY *eckey),
+                                        int (*sign_setup)(EC_KEY *eckey, BN_CTX *ctx_in,
+                                                          BIGNUM **kinvp, BIGNUM **rp),
+                                        ECDSA_SIG *(*sign_sig)(const uint8_t *digest,
+                                                               int digest_len,
+                                                               const BIGNUM *in_kinv,
+                                                               const BIGNUM *in_r,
+                                                               EC_KEY *eckey));
+
+#ifdef __cplusplus
+#define IS_NULL(ptr) ((ptr) == nullptr)
+#else
+#define IS_NULL(ptr) ((ptr) == NULL)
+#endif
+
 // EC_KEY_METHOD_set_sign sets function pointers on |meth|. AWS-LC currently
 // supports setting |sign| and |sign_sig|. |sign_setup| must be set to NULL
 // otherwise the function aborts.
-OPENSSL_EXPORT void EC_KEY_METHOD_set_sign(EC_KEY_METHOD *meth,
-                            int (*sign)(int type, const uint8_t *digest,
-                                        int digest_len, uint8_t *sig,
-                                        unsigned int *siglen,
-                                        const BIGNUM *k_inv,
-                                        const BIGNUM *r, EC_KEY *eckey),
-                            int (*sign_setup)(EC_KEY *eckey, BN_CTX *ctx_in,
-                                              BIGNUM **kinvp, BIGNUM **rp),
-                            ECDSA_SIG *(*sign_sig)(const uint8_t *digest,
-                                                   int digest_len,
-                                                   const BIGNUM *in_kinv,
-                                                   const BIGNUM *in_r,
-                                                   EC_KEY *eckey));
+#define EC_KEY_METHOD_set_sign(meth, sign, sign_setup, sign_sig) \
+  static_assert(IS_NULL(sign_setup), "sign_setup must be NULL");  \
+  EC_KEY_METHOD_set_sign_impl(meth, sign, sign_setup, sign_sig);
 
 // EC_KEY_METHOD_set_flags sets |flags| on |meth|. Currently, the only supported
 // flag is |ECDSA_FLAG_OPAQUE|. Returns zero on failure and one on success.

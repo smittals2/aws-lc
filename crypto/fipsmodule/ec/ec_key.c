@@ -652,7 +652,7 @@ void EC_KEY_METHOD_set_init(EC_KEY_METHOD *meth,
   meth->finish = finish;
 }
 
-void EC_KEY_METHOD_set_sign(EC_KEY_METHOD *meth,
+void EC_KEY_METHOD_set_sign_impl(EC_KEY_METHOD *meth,
                             int (*sign)(int type, const uint8_t *digest,
                                     int digest_len, uint8_t *sig,
                                     unsigned int *siglen, const BIGNUM *k_inv,
@@ -672,7 +672,7 @@ void EC_KEY_METHOD_set_sign(EC_KEY_METHOD *meth,
   // Setting this field is currently not supported by AWS-LC
   if(sign_setup) {
     OPENSSL_PUT_ERROR(EC, ERR_R_SHOULD_NOT_HAVE_BEEN_CALLED);
-    abort();
+    return;
   }
 
   meth->sign = sign;
