@@ -642,7 +642,6 @@ void EC_KEY_METHOD_set_init_impl(EC_KEY_METHOD *meth,
   }
 
   // Setting these fields is currently not supported by AWS-LC
-  assert(!copy && !set_group && !set_private && !set_public);
   if(copy || set_group || set_private || set_public) {
     OPENSSL_PUT_ERROR(EC, ERR_R_SHOULD_NOT_HAVE_BEEN_CALLED);
     abort();

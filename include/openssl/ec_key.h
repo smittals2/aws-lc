@@ -393,9 +393,9 @@ OPENSSL_EXPORT void EC_KEY_METHOD_set_sign_impl(EC_KEY_METHOD *meth,
                                                         EC_KEY *eckey));
 
 
-#define EC_KEY_METHOD_set_sign(meth, sign, sign_setup, sign_sig) \
-  static_assert(IS_NULL(sign_setup), "EC_KEY_METHOD's sign_setup field "\
-                                     "must be NULL");  \
+#define EC_KEY_METHOD_set_sign(meth, sign, sign_setup, sign_sig)         \
+  static_assert(IS_NULL(sign_setup),                                     \
+                "EC_KEY_METHOD's sign_setup field must be NULL");        \
   EC_KEY_METHOD_set_sign_impl(meth, sign, sign_setup, sign_sig);
 
 // EC_KEY_METHOD_set_init_impl sets function pointers on |meth|. AWS-LC
@@ -404,21 +404,22 @@ OPENSSL_EXPORT void EC_KEY_METHOD_set_sign_impl(EC_KEY_METHOD *meth,
 // compile with AWS-LC. If these fields have non-NULL values at runtime, the
 // function will abort.
 OPENSSL_EXPORT void EC_KEY_METHOD_set_init_impl(EC_KEY_METHOD *meth,
-                                                int (*init)(EC_KEY *key),
-                                                void (*finish)(EC_KEY *key),
-                                                int (*copy)(EC_KEY *dest, const EC_KEY *src),
-                                                int (*set_group)(EC_KEY *key, const EC_GROUP *grp),
-                                                int (*set_private)(EC_KEY *key,
-                                                                   const BIGNUM *priv_key),
-                                                int (*set_public)(EC_KEY *key,
-                                                                  const EC_POINT *pub_key));
+                                int (*init)(EC_KEY *key),
+                                void (*finish)(EC_KEY *key),
+                                int (*copy)(EC_KEY *dest, const EC_KEY *src),
+                                int (*set_group)(EC_KEY *key, const EC_GROUP *grp),
+                                int (*set_private)(EC_KEY *key,
+                                                   const BIGNUM *priv_key),
+                                int (*set_public)(EC_KEY *key,
+                                                  const EC_POINT *pub_key));
 
-#define EC_KEY_METHOD_set_init(meth, init, finish, copy, set_group, \
-  set_private, set_public) \
-  static_assert(IS_NULL(copy) && IS_NULL(set_group) && IS_NULL(set_private) \
-  && IS_NULL(set_public), "EC_KEY_METHOD's copy, set_group, set_private, and" \
-                          " set_public fields must be NULL");  \
-  EC_KEY_METHOD_set_init_impl(meth, init, finish, copy, set_group,  \
+#define EC_KEY_METHOD_set_init(meth, init, finish, copy, set_group,     \
+                               set_private, set_public)                 \
+  static_assert(IS_NULL(copy) && IS_NULL(set_group) &&                  \
+                IS_NULL(set_private) && IS_NULL(set_public),            \
+                "EC_KEY_METHOD's copy, set_group, set_private, and "    \
+                "set_public fields must be NULL");                      \
+  EC_KEY_METHOD_set_init_impl(meth, init, finish, copy, set_group,      \
                               set_private, set_public);
 
 // EC_KEY_METHOD_set_flags sets |flags| on |meth|. Currently, the only supported
