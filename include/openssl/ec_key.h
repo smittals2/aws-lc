@@ -378,7 +378,7 @@ OPENSSL_EXPORT const EC_KEY_METHOD *EC_KEY_get_method(const EC_KEY *ec);
 // AWS-LC currently supports setting |sign| and |sign_sig|. |sign_setup| must
 // be set to NULL in order to compile with AWS-LC. At runtime, if |sign_setup|
 // is not a NULL field, the function aborts.
-void EC_KEY_METHOD_set_sign_impl(EC_KEY_METHOD *meth,
+OPENSSL_EXPORT void EC_KEY_METHOD_set_sign_impl(EC_KEY_METHOD *meth,
                                  int (*sign)(int type, const uint8_t *digest,
                                              int digest_len, uint8_t *sig,
                                              unsigned int *siglen,
@@ -403,7 +403,7 @@ void EC_KEY_METHOD_set_sign_impl(EC_KEY_METHOD *meth,
 // |set_group|, |set_private|, and |set_public| must be set to NULL to
 // compile with AWS-LC. If these fields have non-NULL values at runtime, the
 // function will abort.
-void EC_KEY_METHOD_set_init_impl(EC_KEY_METHOD *meth,
+OPENSSL_EXPORT void EC_KEY_METHOD_set_init_impl(EC_KEY_METHOD *meth,
                                                 int (*init)(EC_KEY *key),
                                                 void (*finish)(EC_KEY *key),
                                                 int (*copy)(EC_KEY *dest, const EC_KEY *src),
