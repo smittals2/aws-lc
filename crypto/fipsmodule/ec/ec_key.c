@@ -627,7 +627,7 @@ const EC_KEY_METHOD *EC_KEY_get_method(const EC_KEY *ec) {
   return ec->eckey_method;
 }
 
-void EC_KEY_METHOD_set_init(EC_KEY_METHOD *meth,
+void EC_KEY_METHOD_set_init_impl(EC_KEY_METHOD *meth,
                             int (*init)(EC_KEY *key),
                             void (*finish)(EC_KEY *key),
                             int (*copy)(EC_KEY *dest, const EC_KEY *src),
