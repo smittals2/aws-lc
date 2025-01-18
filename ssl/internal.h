@@ -717,7 +717,7 @@ const EVP_MD *ssl_get_handshake_digest(uint16_t version,
 // An empty result is considered an error regardless of |strict| or
 // |config_tls13|. |has_aes_hw| indicates if the list should be ordered based on
 // having support for AES in hardware or not.
-bool ssl_create_cipher_list(UniquePtr<SSLCipherPreferenceList> *out_cipher_list,
+bool ssl_create_cipher_list(SSL_CTX *ctx, UniquePtr<SSLCipherPreferenceList> *out_cipher_list,
                             const bool has_aes_hw, const char *rule_str,
                             bool strict, bool config_tls13);
 
@@ -3760,6 +3760,8 @@ struct ssl_ctx_st : public bssl::RefCounted<ssl_ctx_st> {
 
   // tls13_cipher_list holds the tls1.3 and above ciphersuites.
   bssl::UniquePtr<bssl::SSLCipherPreferenceList> tls13_cipher_list;
+
+  bssl::UniquePtr<STACK_OF(SSL_CIPHER)> combined_cipher_list;
 
   X509_STORE *cert_store = nullptr;
   LHASH_OF(SSL_SESSION) *sessions = nullptr;

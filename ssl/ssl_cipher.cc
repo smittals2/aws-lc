@@ -1234,7 +1234,52 @@ static bool is_known_default_alias_keyword_filter_rule(const char *rule,
   return false;
 }
 
-bool ssl_create_cipher_list(UniquePtr<SSLCipherPreferenceList> *out_cipher_list,
+static bool update_cipher_list(SSL_CTX *ctx) {
+  bssl::UniquePtr<STACK_OF(SSL_CIPHER)> tmp_cipher_list;
+
+  if (ctx->conf_min_version < TLS1_3_VERSION) {
+    // add tls 1.2 and below suites
+    tmp_cipher_list.reset(sk_SSL_CIPHER_dup(ctx->cipher_list->ciphers.get()));
+  }
+
+  if (!tmp_cipher_list) {
+    tmp_cipher_list.reset(sk_SSL_CIPHER_new_null());
+  }
+
+  if (ctx->conf_max_version >= TLS1_3_VERSION) {
+    // add tls 1.3 suites
+    if (ctx->tls13_cipher_list && ctx->tls13_cipher_list->ciphers) {
+      STACK_OF(SSL_CIPHER) *tls13_cipher_stack = ctx->tls13_cipher_list->ciphers.get();
+
+      for (int i = sk_SSL_CIPHER_num(tls13_cipher_stack) -1; i >= 0; i--) {
+        const SSL_CIPHER *tls13_cipher = sk_SSL_CIPHER_value(tls13_cipher_stack, i);
+        if (!sk_SSL_CIPHER_unshift(tmp_cipher_list.get(), tls13_cipher)) {
+          return 0;
+        }
+      }
+
+    } else { // Add default tls 1.3 ciphersuites
+      const bool has_aes_hw = EVP_has_aes_hardware();
+      if (has_aes_hw) {
+        sk_SSL_CIPHER_unshift(tmp_cipher_list.get(), SSL_get_cipher_by_value(TLS1_3_CK_CHACHA20_POLY1305_SHA256 & 0xffff));
+        sk_SSL_CIPHER_unshift(tmp_cipher_list.get(), SSL_get_cipher_by_value(TLS1_3_CK_AES_128_GCM_SHA256 & 0xffff));
+        sk_SSL_CIPHER_unshift(tmp_cipher_list.get(), SSL_get_cipher_by_value(TLS1_3_CK_AES_256_GCM_SHA384 & 0xffff));
+      } else {
+        sk_SSL_CIPHER_unshift(tmp_cipher_list.get(), SSL_get_cipher_by_value(TLS1_3_CK_AES_256_GCM_SHA384 & 0xffff));
+        sk_SSL_CIPHER_unshift(tmp_cipher_list.get(), SSL_get_cipher_by_value(TLS1_3_CK_AES_128_GCM_SHA256 & 0xffff));
+        sk_SSL_CIPHER_unshift(tmp_cipher_list.get(), SSL_get_cipher_by_value(TLS1_3_CK_CHACHA20_POLY1305_SHA256 & 0xffff));
+      }
+    }
+
+  }
+
+  ctx->combined_cipher_list.reset(tmp_cipher_list.release());
+  // set ctx->combined_cipher_list
+  return true;
+}
+
+
+bool ssl_create_cipher_list(SSL_CTX *ctx, UniquePtr<SSLCipherPreferenceList> *out_cipher_list,
                             const bool has_aes_hw, const char *rule_str,
                             bool strict, bool config_tls13) {
   // Return with error if nothing to do.
@@ -1366,6 +1411,8 @@ bool ssl_create_cipher_list(UniquePtr<SSLCipherPreferenceList> *out_cipher_list,
     OPENSSL_PUT_ERROR(SSL, SSL_R_NO_CIPHER_MATCH);
     return false;
   }
+
+  update_cipher_list(ctx);
 
   return true;
 }
