@@ -39,7 +39,7 @@ index bad1f849..03d07d8d 100644
  #endif /* !defined(OPENSSL_IS_BORINGSSL) && !defined(XMLSEC_OPENSSL_API_300) */
 
 diff --git a/src/openssl/crypto.c b/src/openssl/crypto.c
-index d9e8423c..c63e812c 100644
+index d9e8423c..63272973 100644
 --- a/src/openssl/crypto.c
 +++ b/src/openssl/crypto.c
 @@ -46,7 +46,7 @@ static void             xmlSecOpenSSLErrorsShutdown             (void);
@@ -79,20 +79,32 @@ index d9e8423c..c63e812c 100644
      ERR_unload_strings(gXmlSecOpenSSLErrorsLib, xmlSecOpenSSLStrLib);
      ERR_unload_strings(gXmlSecOpenSSLErrorsLib, xmlSecOpenSSLStrDefReason);
 diff --git a/src/openssl/openssl_compat.h b/src/openssl/openssl_compat.h
-index 968c7eee..92ff1027 100644
+index 968c7eee..260c18b5 100644
 --- a/src/openssl/openssl_compat.h
 +++ b/src/openssl/openssl_compat.h
-@@ -20,7 +20,7 @@
-  *****************************************************************************/
- #ifdef OPENSSL_IS_AWSLC
+@@ -12,27 +12,12 @@
 
+ #include "../cast_helpers.h"
+
+-
+-/******************************************************************************
+- *
+- * AWS LC compatibility (based on BoringSSL)
+- *
+- *****************************************************************************/
+-#ifdef OPENSSL_IS_AWSLC
+-
 -#ifndef OPENSSL_IS_BORINGSSL
-+#if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
- #define OPENSSL_IS_BORINGSSL
- #endif /* OPENSSL_IS_BORINGSSL */
-
-@@ -32,7 +32,7 @@
-  * boringssl compatibility
+-#define OPENSSL_IS_BORINGSSL
+-#endif /* OPENSSL_IS_BORINGSSL */
+-
+-#endif /* ! OPENSSL_IS_AWSLC */
+-
+-
+ /******************************************************************************
+  *
+- * boringssl compatibility
++ * boringssl and aws-lc compatibility
   *
   *****************************************************************************/
 -#ifdef OPENSSL_IS_BORINGSSL
@@ -100,7 +112,7 @@ index 968c7eee..92ff1027 100644
 
  /* Not implemented by LibreSSL (yet?) */
  #define XMLSEC_OPENSSL_NO_ASN1_TIME_TO_TM   1
-@@ -66,7 +66,7 @@
+@@ -66,7 +51,7 @@
 
 
  /* BoringSSL redefines int->size_t or int->unsigned */
